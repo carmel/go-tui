@@ -5,9 +5,9 @@ import (
 	"image/color"
 	"os"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
-	"charm.land/lipgloss/v2/table"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
+	"github.com/carmel/go-tui/lipgloss/table"
 )
 
 // Pokemon types.
@@ -28,26 +28,26 @@ type model struct {
 	table *table.Table
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tui.Cmd { return nil }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmd tui.Cmd
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.table = m.table.Width(msg.Width)
 		m.table = m.table.Height(msg.Height)
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
-			return m, tea.Quit
+			return m, tui.Quit
 		case "enter":
 		}
 	}
 	return m, cmd
 }
 
-func (m model) View() tea.View {
-	v := tea.NewView("\n" + m.table.String() + "\n")
+func (m model) View() tui.View {
+	v := tui.NewView("\n" + m.table.String() + "\n")
 	v.AltScreen = true
 	return v
 }
@@ -156,7 +156,7 @@ func main() {
 		}).
 		Border(lipgloss.ThickBorder())
 
-	if _, err := tea.NewProgram(model{t}).Run(); err != nil {
+	if _, err := tui.NewProgram(model{t}).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

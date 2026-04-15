@@ -8,7 +8,7 @@ import (
 	"log"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 type model int
@@ -16,28 +16,28 @@ type model int
 type tickMsg time.Time
 
 func main() {
-	p := tea.NewProgram(model(5))
+	p := tui.NewProgram(model(5))
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return tick()
 }
 
-func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(message tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := message.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "esc", "ctrl+c":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 
 	case tickMsg:
 		m--
 		if m <= 0 {
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 		return m, tick()
 	}
@@ -45,14 +45,14 @@ func (m model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
-	v := tea.NewView(fmt.Sprintf("\n\n     Hi. This program will exit in %d seconds...", m))
+func (m model) View() tui.View {
+	v := tui.NewView(fmt.Sprintf("\n\n     Hi. This program will exit in %d seconds...", m))
 	v.AltScreen = true
 	return v
 }
 
-func tick() tea.Cmd {
-	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
+func tick() tui.Cmd {
+	return tui.Tick(time.Second, func(t time.Time) tui.Msg {
 		return tickMsg(t)
 	})
 }

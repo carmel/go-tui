@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/fogleman/ease"
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -42,7 +42,7 @@ var (
 
 func main() {
 	initialModel := model{0, false, 10, 0, 0, false, false}
-	p := tea.NewProgram(initialModel)
+	p := tui.NewProgram(initialModel)
 	if _, err := p.Run(); err != nil {
 		fmt.Println("could not start program:", err)
 	}
@@ -53,14 +53,14 @@ type (
 	frameMsg struct{}
 )
 
-func tick() tea.Cmd {
-	return tea.Tick(time.Second, func(time.Time) tea.Msg {
+func tick() tui.Cmd {
+	return tui.Tick(time.Second, func(time.Time) tui.Msg {
 		return tickMsg{}
 	})
 }
 
-func frame() tea.Cmd {
-	return tea.Tick(time.Second/60, func(time.Time) tea.Msg {
+func frame() tui.Cmd {
+	return tui.Tick(time.Second/60, func(time.Time) tui.Msg {
 		return frameMsg{}
 	})
 }
@@ -75,18 +75,18 @@ type model struct {
 	Quitting bool
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return tick()
 }
 
 // Main update function.
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	// Make sure these keys always quit
-	if msg, ok := msg.(tea.KeyPressMsg); ok {
+	if msg, ok := msg.(tui.KeyPressMsg); ok {
 		k := msg.String()
 		if k == "q" || k == "esc" || k == "ctrl+c" {
 			m.Quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 
@@ -99,25 +99,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // The main view, which just calls the appropriate sub-view
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	var s string
 	if m.Quitting {
-		return tea.NewView("\n  See you later!\n\n")
+		return tui.NewView("\n  See you later!\n\n")
 	}
 	if !m.Chosen {
 		s = choicesView(m)
 	} else {
 		s = chosenView(m)
 	}
-	return tea.NewView(mainStyle.Render("\n" + s + "\n"))
+	return tui.NewView(mainStyle.Render("\n" + s + "\n"))
 }
 
 // Sub-update functions
 
 // Update loop for the first view where you're choosing a task.
-func updateChoices(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
+func updateChoices(msg tui.Msg, m model) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "j", "down":
 			m.Choice++
@@ -137,7 +137,7 @@ func updateChoices(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	case tickMsg:
 		if m.Ticks == 0 {
 			m.Quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 		m.Ticks--
 		return m, tick()
@@ -147,7 +147,7 @@ func updateChoices(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 }
 
 // Update loop for the second view after a choice has been made
-func updateChosen(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
+func updateChosen(msg tui.Msg, m model) (tui.Model, tui.Cmd) {
 	switch msg.(type) {
 	case frameMsg:
 		if !m.Loaded {
@@ -166,7 +166,7 @@ func updateChosen(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 		if m.Loaded {
 			if m.Ticks == 0 {
 				m.Quitting = true
-				return m, tea.Quit
+				return m, tui.Quit
 			}
 			m.Ticks--
 			return m, tick()

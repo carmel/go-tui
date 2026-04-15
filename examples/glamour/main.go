@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/glamour/v2"
-	"charm.land/glamour/v2/styles"
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/glamour"
+	"github.com/carmel/go-tui/glamour/styles"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/viewport"
 )
 
@@ -105,18 +105,18 @@ func newExample(isDark bool) (*example, error) {
 	}, nil
 }
 
-func (e example) Init() tea.Cmd {
+func (e example) Init() tui.Cmd {
 	return nil
 }
 
-func (e example) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (e example) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "ctrl+c", "esc":
-			return e, tea.Quit
+			return e, tui.Quit
 		default:
-			var cmd tea.Cmd
+			var cmd tui.Cmd
 			e.viewport, cmd = e.viewport.Update(msg)
 			return e, cmd
 		}
@@ -125,8 +125,8 @@ func (e example) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (e example) View() tea.View {
-	return tea.NewView(e.viewport.View() + e.helpView())
+func (e example) View() tui.View {
+	return tui.NewView(e.viewport.View() + e.helpView())
 }
 
 func (e example) helpView() string {
@@ -141,7 +141,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if _, err := tea.NewProgram(model).Run(); err != nil {
+	if _, err := tui.NewProgram(model).Run(); err != nil {
 		fmt.Println("Bummer, there's been an error:", err)
 		os.Exit(1)
 	}

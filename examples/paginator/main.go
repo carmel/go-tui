@@ -8,10 +8,10 @@ import (
 	"log"
 	"strings"
 
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/paginator"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 type styles struct {
@@ -59,27 +59,27 @@ func (m *model) updateStyles(isDark bool) {
 	m.paginator.InactiveDot = styles.inactiveDot.String()
 }
 
-func (m model) Init() tea.Cmd {
-	return tea.RequestBackgroundColor
+func (m model) Init() tui.Cmd {
+	return tui.RequestBackgroundColor
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmd tui.Cmd
 	switch msg := msg.(type) {
-	case tea.BackgroundColorMsg:
+	case tui.BackgroundColorMsg:
 		m.updateStyles(msg.IsDark())
 		return m, nil
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "esc", "ctrl+c":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 	m.paginator, cmd = m.paginator.Update(msg)
 	return m, cmd
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	var b strings.Builder
 	b.WriteString("\n  Paginator Example\n\n")
 	start, end := m.paginator.GetSliceBounds(len(m.items))
@@ -88,11 +88,11 @@ func (m model) View() tea.View {
 	}
 	b.WriteString("  " + m.paginator.View())
 	b.WriteString("\n\n  h/l ←/→ page • q: quit\n")
-	return tea.NewView(b.String())
+	return tui.NewView(b.String())
 }
 
 func main() {
-	p := tea.NewProgram(newModel())
+	p := tui.NewProgram(newModel())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}

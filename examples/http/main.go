@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 const url = "https://charm.sh/"
@@ -25,29 +25,29 @@ type errMsg struct{ error }
 func (e errMsg) Error() string { return e.error.Error() }
 
 func main() {
-	p := tea.NewProgram(model{})
+	p := tui.NewProgram(model{})
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return checkServer
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "ctrl+c", "esc":
-			return m, tea.Quit
+			return m, tui.Quit
 		default:
 			return m, nil
 		}
 
 	case statusMsg:
 		m.status = int(msg)
-		return m, tea.Quit
+		return m, tui.Quit
 
 	case errMsg:
 		m.err = msg
@@ -58,17 +58,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	s := fmt.Sprintf("Checking %s...", url)
 	if m.err != nil {
 		s += fmt.Sprintf("something went wrong: %s", m.err)
 	} else if m.status != 0 {
 		s += fmt.Sprintf("%d %s", m.status, http.StatusText(m.status))
 	}
-	return tea.NewView(s + "\n")
+	return tui.NewView(s + "\n")
 }
 
-func checkServer() tea.Msg {
+func checkServer() tui.Msg {
 	c := &http.Client{
 		Timeout: 10 * time.Second,
 	}

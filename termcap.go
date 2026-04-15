@@ -19,11 +19,11 @@ type requestCapabilityMsg string
 // command to query the terminal for its color capabilities. Example:
 //
 //	switch msg := msg.(type) {
-//	case tea.ColorProfileMsg:
+//	case tui.ColorProfileMsg:
 //	  if msg.Profile != colorprofile.TrueColor {
-//	    return m, tea.Batch(
-//	      tea.RequestCapability("RGB"),
-//	      tea.RequestCapability("Tc"),
+//	    return m, tui.Batch(
+//	      tui.RequestCapability("RGB"),
+//	      tui.RequestCapability("Tc"),
 //	    )
 //	  }
 //	}

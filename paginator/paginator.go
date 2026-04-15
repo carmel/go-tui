@@ -7,7 +7,7 @@ package paginator
 import (
 	"fmt"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/key"
 )
 
@@ -159,9 +159,9 @@ func WithPerPage(perPage int) Option {
 }
 
 // Update is the Tea update function which binds keystrokes to pagination.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.KeyMap.NextPage):
 			m.NextPage()

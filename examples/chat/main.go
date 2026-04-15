@@ -8,15 +8,15 @@ import (
 	"os"
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/cursor"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textarea"
 	"github.com/carmel/go-tui/viewport"
 )
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Oof: %v\n", err)
 	}
@@ -66,13 +66,13 @@ Type a message and press Enter to send.`)
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return textarea.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.viewport.SetWidth(msg.Width)
 		m.textarea.SetWidth(msg.Width)
 		m.viewport.SetHeight(msg.Height - m.textarea.Height())
@@ -82,11 +82,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.viewport.SetContent(lipgloss.NewStyle().Width(m.viewport.Width()).Render(strings.Join(m.messages, "\n")))
 		}
 		m.viewport.GotoBottom()
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
 			fmt.Println(m.textarea.Value())
-			return m, tea.Quit
+			return m, tui.Quit
 		case "enter":
 			m.messages = append(m.messages, m.senderStyle.Render("You: ")+m.textarea.Value())
 			m.viewport.SetContent(lipgloss.NewStyle().Width(m.viewport.Width()).Render(strings.Join(m.messages, "\n")))
@@ -95,14 +95,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		default:
 			// Send all other keypresses to the textarea.
-			var cmd tea.Cmd
+			var cmd tui.Cmd
 			m.textarea, cmd = m.textarea.Update(msg)
 			return m, cmd
 		}
 
 	case cursor.BlinkMsg:
 		// Textarea should also process cursor blinks.
-		var cmd tea.Cmd
+		var cmd tui.Cmd
 		m.textarea, cmd = m.textarea.Update(msg)
 		return m, cmd
 	}
@@ -110,9 +110,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	viewportView := m.viewport.View()
-	v := tea.NewView(viewportView + "\n" + m.textarea.View())
+	v := tui.NewView(viewportView + "\n" + m.textarea.View())
 	c := m.textarea.Cursor()
 	if c != nil {
 		c.Y += lipgloss.Height(viewportView)

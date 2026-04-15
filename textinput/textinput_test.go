@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 func Test_CurrentSuggestion(t *testing.T) {
@@ -107,8 +107,8 @@ func ExampleValidateFunc() {
 	}
 }
 
-func keyPress(key rune) tea.Msg {
-	return tea.KeyPressMsg{Code: key, Text: string(key)}
+func keyPress(key rune) tui.Msg {
+	return tui.KeyPressMsg{Code: key, Text: string(key)}
 }
 
 func sendString(m Model, str string) Model {

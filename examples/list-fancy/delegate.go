@@ -1,7 +1,7 @@
 package main
 
 import (
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/key"
 	"github.com/carmel/go-tui/list"
 )
@@ -9,7 +9,7 @@ import (
 func newItemDelegate(keys *delegateKeyMap, styles *styles) list.DefaultDelegate {
 	d := list.NewDefaultDelegate()
 
-	d.UpdateFunc = func(msg tea.Msg, m *list.Model) tea.Cmd {
+	d.UpdateFunc = func(msg tui.Msg, m *list.Model) tui.Cmd {
 		var title string
 
 		if i, ok := m.SelectedItem().(item); ok {
@@ -19,7 +19,7 @@ func newItemDelegate(keys *delegateKeyMap, styles *styles) list.DefaultDelegate 
 		}
 
 		switch msg := msg.(type) {
-		case tea.KeyPressMsg:
+		case tui.KeyPressMsg:
 			switch {
 			case key.Matches(msg, keys.choose):
 				return m.NewStatusMessage(styles.statusMessage.Render("You chose " + title))

@@ -5,9 +5,9 @@ import (
 	"io"
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 )
 
@@ -86,7 +86,7 @@ type DefaultItem interface {
 type DefaultDelegate struct {
 	ShowDescription bool
 	Styles          DefaultItemStyles
-	UpdateFunc      func(tea.Msg, *Model) tea.Cmd
+	UpdateFunc      func(tui.Msg, *Model) tui.Cmd
 	ShortHelpFunc   func() []key.Binding
 	FullHelpFunc    func() [][]key.Binding
 	height          int
@@ -133,7 +133,7 @@ func (d DefaultDelegate) Spacing() int {
 }
 
 // Update checks whether the delegate's UpdateFunc is set and calls it.
-func (d DefaultDelegate) Update(msg tea.Msg, m *Model) tea.Cmd {
+func (d DefaultDelegate) Update(msg tui.Msg, m *Model) tui.Cmd {
 	if d.UpdateFunc == nil {
 		return nil
 	}

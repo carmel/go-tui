@@ -5,8 +5,8 @@ import (
 	"os"
 	"strings"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 type styles struct {
@@ -49,16 +49,16 @@ type model struct {
 	activeTab  int
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch keypress := msg.String(); keypress {
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return m, tui.Quit
 		case "right", "l", "n", "tab":
 			m.activeTab = min(m.activeTab+1, len(m.Tabs)-1)
 			return m, nil
@@ -79,9 +79,9 @@ func tabBorderWithBottom(left, middle, right string) lipgloss.Border {
 	return border
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.styles == nil {
-		return tea.NewView("")
+		return tui.NewView("")
 	}
 
 	doc := strings.Builder{}
@@ -115,14 +115,14 @@ func (m model) View() tea.View {
 	doc.WriteString(row)
 	doc.WriteString("\n")
 	doc.WriteString(s.window.Width((lipgloss.Width(row))).Render(m.TabContent[m.activeTab]))
-	return tea.NewView(s.doc.Render(doc.String()))
+	return tui.NewView(s.doc.Render(doc.String()))
 }
 
 func main() {
 	tabs := []string{"Lip Gloss", "Blush", "Eye Shadow", "Mascara", "Foundation"}
 	tabContent := []string{"Lip Gloss Tab", "Blush Tab", "Eye Shadow Tab", "Mascara Tab", "Foundation Tab"}
 	m := model{Tabs: tabs, TabContent: tabContent, styles: newStyles(true)} // default to dark styles.
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tui.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

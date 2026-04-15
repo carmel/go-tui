@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/filepicker"
 )
 
@@ -20,29 +20,29 @@ type model struct {
 
 type clearErrorMsg struct{}
 
-func clearErrorAfter(t time.Duration) tea.Cmd {
-	return tea.Tick(t, func(_ time.Time) tea.Msg {
+func clearErrorAfter(t time.Duration) tui.Cmd {
+	return tui.Tick(t, func(_ time.Time) tui.Msg {
 		return clearErrorMsg{}
 	})
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return m.filepicker.Init()
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	case clearErrorMsg:
 		m.err = nil
 	}
 
-	var cmd tea.Cmd
+	var cmd tui.Cmd
 	m.filepicker, cmd = m.filepicker.Update(msg)
 
 	// Did the user select a file?
@@ -57,15 +57,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Let's clear the selectedFile and display an error.
 		m.err = errors.New(path + " is not valid.")
 		m.selectedFile = ""
-		return m, tea.Batch(cmd, clearErrorAfter(2*time.Second))
+		return m, tui.Batch(cmd, clearErrorAfter(2*time.Second))
 	}
 
 	return m, cmd
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.quitting {
-		return tea.NewView("")
+		return tui.NewView("")
 	}
 	var s strings.Builder
 	s.WriteString("\n  ")
@@ -77,7 +77,7 @@ func (m model) View() tea.View {
 		s.WriteString("Selected file: " + m.filepicker.Styles.Selected.Render(m.selectedFile))
 	}
 	s.WriteString("\n\n" + m.filepicker.View() + "\n")
-	v := tea.NewView(s.String())
+	v := tui.NewView(s.String())
 	v.AltScreen = true
 	return v
 }
@@ -88,7 +88,7 @@ func main() {
 	fp.CurrentDirectory, _ = os.UserHomeDir()
 
 	m := model{filepicker: fp}
-	tm, _ := tea.NewProgram(m).Run()
+	tm, _ := tui.NewProgram(m).Run()
 	mm := tm.(model)
 	fmt.Println("\n  You selected: " + m.filepicker.Styles.Selected.Render(mm.selectedFile) + "\n")
 }

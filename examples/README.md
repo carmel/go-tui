@@ -3,7 +3,7 @@
 ### Alt Screen Toggle
 
 The `altscreen-toggle` example shows how to transition between the alternative
-screen buffer and the normal screen buffer using Bubble Tea.
+screen buffer and the normal screen buffer using Bubble tui.
 
 <a href="./altscreen-toggle/main.go">
   <img width="750" src="./altscreen-toggle/altscreen-toggle.gif" />
@@ -49,7 +49,7 @@ your Bubble Tea application.
 
 The `exec` example shows how to execute a running command during the execution
 of a Bubble Tea application such as launching an `EDITOR`.
- 
+
 <a href="./exec/main.go">
   <img width="750" src="./exec/exec.gif" />
 </a>
@@ -124,7 +124,7 @@ application.
 ### Package Manager
 
 The `package-manager` example shows how to build an interface for a package
-manager using the `tea.Println` feature.
+manager using the `tui.Println` feature.
 
 <a href="./package-manager/main.go">
   <img width="750" src="./package-manager/package-manager.gif" />
@@ -168,7 +168,7 @@ animated progression.
 ### Download Progress
 
 The `progress-download` example demonstrates how to download a file while
-indicating download progress through Bubble Tea.
+indicating download progress through Bubble tui.
 
 <a href="./progress-download/main.go">
   Code
@@ -202,7 +202,7 @@ The `result` example shows a choice menu with the ability to select an option.
 
 ### Send Msg
 
-The `send-msg` example demonstrates the usage of custom `tea.Msg`s.
+The `send-msg` example demonstrates the usage of custom `tui.Msg`s.
 
 <a href="./send-msg/main.go">
   <img width="750" src="./send-msg/send-msg.gif" />
@@ -210,7 +210,7 @@ The `send-msg` example demonstrates the usage of custom `tea.Msg`s.
 
 ### Sequence
 
-The `sequence` example demonstrates the `tea.Sequence` command.
+The `sequence` example demonstrates the `tui.Sequence` command.
 
 <a href="./sequence/main.go">
   <img width="750" src="./sequence/sequence.gif" />
@@ -251,7 +251,7 @@ application and being able to switch focus between them.
 
 ### Stop Watch
 
-The `stopwatch` example shows a sample stop watch built with Bubble Tea.
+The `stopwatch` example shows a sample stop watch built with Bubble tui.
 
 <a href="./stopwatch/main.go">
   <img width="750" src="./stopwatch/stopwatch.gif" />
@@ -302,7 +302,7 @@ focus between them as well as changing the cursor mode.
 
 ### Timer
 
-The `timer` example shows a simple timer built with Bubble Tea.
+The `timer` example shows a simple timer built with Bubble tui.
 
 <a href="./timer/main.go">
   <img width="750" src="./timer/timer.gif" />
@@ -311,7 +311,7 @@ The `timer` example shows a simple timer built with Bubble Tea.
 ### TUI Daemon
 
 The `tui-daemon-combo` demonstrates building a text-user interface along with a
-daemon mode using Bubble Tea.
+daemon mode using Bubble tui.
 
 <a href="./tui-daemon-combo/main.go">
   <img width="750" src="./tui-daemon-combo/tui-daemon-combo.gif" />
@@ -325,4 +325,3 @@ multiple views and switch between them.
 <a href="./views/main.go">
   <img width="750" src="./views/views.gif" />
 </a>
-

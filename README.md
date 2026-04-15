@@ -31,7 +31,7 @@ To get started, see the tutorial below, the [examples][examples], the
 
 ## By the way
 
-Be sure to check out [Bubbles][bubbles], a library of common UI components for Bubble Tea.
+Be sure to check out [Bubbles][bubbles], a library of common UI components for Bubble tui.
 
 <p>
     <a href="https://github.com/charmbracelet/bubbles"><img src="https://github.com/user-attachments/assets/b6dc4638-b67a-4bfa-88d0-a8e8833c3ac9" width="172" alt="Bubbles Badge"></a>&nbsp;&nbsp;
@@ -72,7 +72,7 @@ import (
     "fmt"
     "os"
 
-    tea "github.com/carmel/go-tui"
+    "github.com/carmel/go-tui"
 )
 ```
 
@@ -122,7 +122,7 @@ to do any I/O, so for the command, we'll just return `nil`, which translates to
 "no command."
 
 ```go
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
     // Just return `nil`, which means "no I/O right now, please."
     return nil
 }
@@ -145,22 +145,22 @@ tick, or a response from a server.
 We usually figure out which type of `Msg` we received with a type switch, but
 you could also use a type assertion.
 
-For now, we'll just deal with `tea.KeyPressMsg` messages, which are
+For now, we'll just deal with `tui.KeyPressMsg` messages, which are
 automatically sent to the update function when keys are pressed.
 
 ```go
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
     switch msg := msg.(type) {
 
     // Is it a key press?
-    case tea.KeyPressMsg:
+    case tui.KeyPressMsg:
 
         // Cool, what was the actual key pressed?
         switch msg.String() {
 
         // These keys should exit the program.
         case "ctrl+c", "q":
-            return m, tea.Quit
+            return m, tui.Quit
 
         // The "up" and "k" keys move the cursor up
         case "up", "k":
@@ -193,14 +193,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 ```
 
 You may have noticed that <kbd>ctrl+c</kbd> and <kbd>q</kbd> above return
-a `tea.Quit` command with the model. That’s a special command which instructs
+a `tui.Quit` command with the model. That’s a special command which instructs
 the Bubble Tea runtime to quit, exiting the program.
 
 ### The View Method
 
 At last, it’s time to render our UI. Of all the methods, the view is the
 simplest. We look at the model in its current state and use it to build a
-`tea.View`. The view declares our UI content and, optionally, terminal features
+`tui.View`. The view declares our UI content and, optionally, terminal features
 like alt screen mode, mouse tracking, cursor position, and more.
 
 Because the view describes the entire UI of your application, you don’t have to
@@ -208,7 +208,7 @@ worry about redrawing logic and stuff like that. Bubble Tea takes care of it
 for you.
 
 ```go
-func (m model) View() tea.View {
+func (m model) View() tui.View {
     // The header
     s := "What should we buy at the market?\n\n"
 
@@ -235,18 +235,18 @@ func (m model) View() tea.View {
     s += "\nPress q to quit.\n"
 
     // Send the UI for rendering
-    return tea.NewView(s)
+    return tui.NewView(s)
 }
 ```
 
 ### All Together Now
 
 The last step is to simply run our program. We pass our initial model to
-`tea.NewProgram` and let it rip:
+`tui.NewProgram` and let it rip:
 
 ```go
 func main() {
-    p := tea.NewProgram(initialModel())
+    p := tui.NewProgram(initialModel())
     if _, err := p.Run(); err != nil {
         fmt.Printf("Alas, there's been an error: %v", err)
         os.Exit(1)
@@ -300,7 +300,7 @@ the following prior to starting your Bubble Tea program:
 
 ```go
 if len(os.Getenv("DEBUG")) > 0 {
-	f, err := tea.LogToFile("debug.log", "debug")
+	f, err := tui.LogToFile("debug.log", "debug")
 	if err != nil {
 		fmt.Println("fatal:", err)
 		os.Exit(1)

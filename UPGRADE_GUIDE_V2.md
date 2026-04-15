@@ -10,8 +10,8 @@ This guide covers everything you need to change when upgrading from Bubble Tea v
 Here's the short version — a checklist you can follow top to bottom. Each item links to the relevant section below.
 
 - [ ] [Update import paths](#import-paths)
-- [ ] [Change `View() string` to `View() tea.View`](#view-returns-a-teaview-now)
-- [ ] [Replace `tea.KeyMsg` with `tea.KeyPressMsg`](#key-messages)
+- [ ] [Change `View() string` to `View() tui.View`](#view-returns-a-teaview-now)
+- [ ] [Replace `tui.KeyMsg` with `tui.KeyPressMsg`](#key-messages)
 - [ ] [Update key fields: `msg.Type` / `msg.Runes` / `msg.Alt`](#key-messages)
 - [ ] [Replace `case " ":` with `case "space":`](#key-messages)
 - [ ] [Update mouse message usage](#mouse-messages)
@@ -19,8 +19,8 @@ Here's the short version — a checklist you can follow top to bottom. Each item
 - [ ] [Remove old program options → use View fields](#removed-program-options)
 - [ ] [Remove imperative commands → use View fields](#removed-commands)
 - [ ] [Remove old program methods](#removed-program-methods)
-- [ ] [Rename `tea.WindowSize()` → `tea.RequestWindowSize`](#renamed-apis)
-- [ ] [Replace `tea.Sequentially(...)` → `tea.Sequence(...)`](#renamed-apis)
+- [ ] [Rename `tui.WindowSize()` → `tui.RequestWindowSize`](#renamed-apis)
+- [ ] [Replace `tui.Sequentially(...)` → `tui.Sequence(...)`](#renamed-apis)
 
 ## Import Paths
 
@@ -28,38 +28,38 @@ The module path changed to a vanity domain. Lip Gloss moved too.
 
 ```go
 // Before
-import tea "github.com/carmel/go-tui"
+import "github.com/carmel/go-tui"
 import "github.com/charmbracelet/lipgloss"
 
 // After
-import tea "github.com/carmel/go-tui"
-import "charm.land/lipgloss/v2"
+import "github.com/carmel/go-tui"
+import "github.com/carmel/go-tui/lipgloss"
 ```
 
 ## The Big Idea: Declarative Views
 
-The single biggest change in v2 is the shift from **imperative commands** to **declarative View fields**. In v1, you'd use program options like `tea.WithAltScreen()` and commands like `tea.EnterAltScreen` to toggle terminal features on and off. In v2, you just set fields on the `tea.View` struct in your `View()` method and Bubble Tea handles the rest.
+The single biggest change in v2 is the shift from **imperative commands** to **declarative View fields**. In v1, you'd use program options like `tui.WithAltScreen()` and commands like `tui.EnterAltScreen` to toggle terminal features on and off. In v2, you just set fields on the `tui.View` struct in your `View()` method and Bubble Tea handles the rest.
 
 This means: no more startup option flags, no more toggle commands, no more fighting over state. Just declare what you want and Bubble Tea will make it so.
 
 ```go
 // v1: imperative — scattered across NewProgram, Init, and Update
-p := tea.NewProgram(model{}, tea.WithAltScreen(), tea.WithMouseCellMotion())
+p := tui.NewProgram(model{}, tui.WithAltScreen(), tui.WithMouseCellMotion())
 
 // v2: declarative — everything lives in View()
-func (m model) View() tea.View {
-    v := tea.NewView("Hello!")
+func (m model) View() tui.View {
+    v := tui.NewView("Hello!")
     v.AltScreen = true
-    v.MouseMode = tea.MouseModeCellMotion
+    v.MouseMode = tui.MouseModeCellMotion
     return v
 }
 ```
 
 Keep this in mind as you go through the rest of the guide — most of the "removed" things simply moved into View fields.
 
-## View Returns a `tea.View` Now
+## View Returns a `tui.View` Now
 
-The `View()` method no longer returns a `string`. It returns a `tea.View` struct.
+The `View()` method no longer returns a `string`. It returns a `tui.View` struct.
 
 ```go
 // Before:
@@ -68,23 +68,23 @@ func (m model) View() string {
 }
 
 // After:
-func (m model) View() tea.View {
-    return tea.NewView("Hello, world!")
+func (m model) View() tui.View {
+    return tui.NewView("Hello, world!")
 }
 ```
 
 You can also use the longer form if you need to set additional fields:
 
 ```go
-func (m model) View() tea.View {
-    var v tea.View
+func (m model) View() tui.View {
+    var v tui.View
     v.SetContent("Hello, world!")
     v.AltScreen = true
     return v
 }
 ```
 
-The `tea.View` struct has fields for everything that used to be controlled by options and commands:
+The `tui.View` struct has fields for everything that used to be controlled by options and commands:
 
 | View Field                  | What It Does                                                    |
 | --------------------------- | --------------------------------------------------------------- |
@@ -105,34 +105,34 @@ The `tea.View` struct has fields for everything that used to be controlled by op
 
 Key messages got a major overhaul. Here's the quick rundown:
 
-### `tea.KeyMsg` is now an interface
+### `tui.KeyMsg` is now an interface
 
-In v1, `tea.KeyMsg` was a struct you'd match on for key presses. In v2, it's an **interface** that covers both key presses and releases. For most code, you want `tea.KeyPressMsg`:
+In v1, `tui.KeyMsg` was a struct you'd match on for key presses. In v2, it's an **interface** that covers both key presses and releases. For most code, you want `tui.KeyPressMsg`:
 
 ```go
 // Before:
-case tea.KeyMsg:
+case tui.KeyMsg:
     switch msg.String() {
     case "q":
-        return m, tea.Quit
+        return m, tui.Quit
     }
 
 // After:
-case tea.KeyPressMsg:
+case tui.KeyPressMsg:
     switch msg.String() {
     case "q":
-        return m, tea.Quit
+        return m, tui.Quit
     }
 ```
 
-If you want to handle both presses and releases, use `tea.KeyMsg` and type-switch inside:
+If you want to handle both presses and releases, use `tui.KeyMsg` and type-switch inside:
 
 ```go
-case tea.KeyMsg:
+case tui.KeyMsg:
     switch key := msg.(type) {
-    case tea.KeyPressMsg:
+    case tui.KeyPressMsg:
         // key press
-    case tea.KeyReleaseMsg:
+    case tui.KeyReleaseMsg:
         // key release
     }
 ```
@@ -141,11 +141,11 @@ case tea.KeyMsg:
 
 | v1             | v2         | Notes                                                          |
 | -------------- | ---------- | -------------------------------------------------------------- |
-| `msg.Type`     | `msg.Code` | A `rune` — can be `tea.KeyEnter`, `'a'`, etc.                  |
+| `msg.Type`     | `msg.Code` | A `rune` — can be `tui.KeyEnter`, `'a'`, etc.                  |
 | `msg.Runes`    | `msg.Text` | Now a `string`, not `[]rune`                                   |
-| `msg.Alt`      | `msg.Mod`  | `msg.Mod.Contains(tea.ModAlt)` for alt, etc.                   |
-| `tea.KeyRune`  | —          | Check `len(msg.Text) > 0` instead                              |
-| `tea.KeyCtrlC` | —          | Use `msg.String() == "ctrl+c"` or check `msg.Code` + `msg.Mod` |
+| `msg.Alt`      | `msg.Mod`  | `msg.Mod.Contains(tui.ModAlt)` for alt, etc.                   |
+| `tui.KeyRune`  | —          | Check `len(msg.Text) > 0` instead                              |
+| `tui.KeyCtrlC` | —          | Use `msg.String() == "ctrl+c"` or check `msg.Code` + `msg.Mod` |
 
 ### Space bar changed
 
@@ -165,19 +165,19 @@ case "space":
 
 ```go
 // Before:
-case tea.KeyCtrlC:
+case tui.KeyCtrlC:
     // ctrl+c
 
 // After (option A — string matching):
-case tea.KeyPressMsg:
+case tui.KeyPressMsg:
     switch msg.String() {
     case "ctrl+c":
         // ctrl+c
     }
 
 // After (option B — field matching):
-case tea.KeyPressMsg:
-    if msg.Code == 'c' && msg.Mod == tea.ModCtrl {
+case tui.KeyPressMsg:
+    if msg.Code == 'c' && msg.Mod == tui.ModCtrl {
         // ctrl+c
     }
 ```
@@ -193,37 +193,37 @@ These are new in v2 and don't have v1 equivalents:
 
 ## Paste Messages
 
-Paste events no longer come in as `tea.KeyMsg` with a `Paste` flag. They're now their own message types:
+Paste events no longer come in as `tui.KeyMsg` with a `Paste` flag. They're now their own message types:
 
 ```go
 // Before:
-case tea.KeyMsg:
+case tui.KeyMsg:
     if msg.Paste {
         m.text += string(msg.Runes)
     }
 
 // After:
-case tea.PasteMsg:
+case tui.PasteMsg:
     m.text += msg.Content
-case tea.PasteStartMsg:
+case tui.PasteStartMsg:
     // paste started
-case tea.PasteEndMsg:
+case tui.PasteEndMsg:
     // paste ended
 ```
 
 ## Mouse Messages
 
-### `tea.MouseMsg` is now an interface
+### `tui.MouseMsg` is now an interface
 
-In v1, `tea.MouseMsg` was a struct with `X`, `Y`, `Button`, etc. In v2, it's an **interface**. You get the coordinates by calling `msg.Mouse()`:
+In v1, `tui.MouseMsg` was a struct with `X`, `Y`, `Button`, etc. In v2, it's an **interface**. You get the coordinates by calling `msg.Mouse()`:
 
 ```go
 // Before:
-case tea.MouseMsg:
+case tui.MouseMsg:
     x, y := msg.X, msg.Y
 
 // After:
-case tea.MouseMsg:
+case tui.MouseMsg:
     mouse := msg.Mouse()
     x, y := mouse.X, mouse.Y
 ```
@@ -234,21 +234,21 @@ Instead of checking `msg.Action`, match on specific message types:
 
 ```go
 // Before:
-case tea.MouseMsg:
-    if msg.Action == tea.MouseActionPress && msg.Button == tea.MouseButtonLeft {
+case tui.MouseMsg:
+    if msg.Action == tui.MouseActionPress && msg.Button == tui.MouseButtonLeft {
         // left click
     }
 
 // After:
-case tea.MouseClickMsg:
-    if msg.Button == tea.MouseLeft {
+case tui.MouseClickMsg:
+    if msg.Button == tui.MouseLeft {
         // left click
     }
-case tea.MouseReleaseMsg:
+case tui.MouseReleaseMsg:
     // release
-case tea.MouseWheelMsg:
+case tui.MouseWheelMsg:
     // scroll
-case tea.MouseMotionMsg:
+case tui.MouseMotionMsg:
     // movement
 ```
 
@@ -256,15 +256,15 @@ case tea.MouseMotionMsg:
 
 | v1                          | v2                    |
 | --------------------------- | --------------------- |
-| `tea.MouseButtonLeft`       | `tea.MouseLeft`       |
-| `tea.MouseButtonRight`      | `tea.MouseRight`      |
-| `tea.MouseButtonMiddle`     | `tea.MouseMiddle`     |
-| `tea.MouseButtonWheelUp`    | `tea.MouseWheelUp`    |
-| `tea.MouseButtonWheelDown`  | `tea.MouseWheelDown`  |
-| `tea.MouseButtonWheelLeft`  | `tea.MouseWheelLeft`  |
-| `tea.MouseButtonWheelRight` | `tea.MouseWheelRight` |
+| `tui.MouseButtonLeft`       | `tui.MouseLeft`       |
+| `tui.MouseButtonRight`      | `tui.MouseRight`      |
+| `tui.MouseButtonMiddle`     | `tui.MouseMiddle`     |
+| `tui.MouseButtonWheelUp`    | `tui.MouseWheelUp`    |
+| `tui.MouseButtonWheelDown`  | `tui.MouseWheelDown`  |
+| `tui.MouseButtonWheelLeft`  | `tui.MouseWheelLeft`  |
+| `tui.MouseButtonWheelRight` | `tui.MouseWheelRight` |
 
-### `tea.MouseEvent` → `tea.Mouse`
+### `tui.MouseEvent` → `tui.Mouse`
 
 The `MouseEvent` struct is gone. The new `Mouse` struct has `X`, `Y`, `Button`, and `Mod` fields.
 
@@ -272,12 +272,12 @@ The `MouseEvent` struct is gone. The new `Mouse` struct has `X`, `Y`, `Button`, 
 
 ```go
 // Before:
-p := tea.NewProgram(model{}, tea.WithMouseCellMotion())
+p := tui.NewProgram(model{}, tui.WithMouseCellMotion())
 
 // After:
-func (m model) View() tea.View {
-    v := tea.NewView("...")
-    v.MouseMode = tea.MouseModeCellMotion
+func (m model) View() tui.View {
+    v := tui.NewView("...")
+    v.MouseMode = tui.MouseModeCellMotion
     return v
 }
 ```
@@ -288,13 +288,13 @@ These options no longer exist. They all moved to View fields.
 
 | Removed Option                | Do This Instead                                                      |
 | ----------------------------- | -------------------------------------------------------------------- |
-| `tea.WithAltScreen()`         | `view.AltScreen = true`                                              |
-| `tea.WithMouseCellMotion()`   | `view.MouseMode = tea.MouseModeCellMotion`                           |
-| `tea.WithMouseAllMotion()`    | `view.MouseMode = tea.MouseModeAllMotion`                            |
-| `tea.WithReportFocus()`       | `view.ReportFocus = true`                                            |
-| `tea.WithoutBracketedPaste()` | `view.DisableBracketedPasteMode = true`                              |
-| `tea.WithInputTTY()`          | Just remove it — v2 always opens the TTY for input automatically     |
-| `tea.WithANSICompressor()`    | Just remove it — the new renderer handles optimization automatically |
+| `tui.WithAltScreen()`         | `view.AltScreen = true`                                              |
+| `tui.WithMouseCellMotion()`   | `view.MouseMode = tui.MouseModeCellMotion`                           |
+| `tui.WithMouseAllMotion()`    | `view.MouseMode = tui.MouseModeAllMotion`                            |
+| `tui.WithReportFocus()`       | `view.ReportFocus = true`                                            |
+| `tui.WithoutBracketedPaste()` | `view.DisableBracketedPasteMode = true`                              |
+| `tui.WithInputTTY()`          | Just remove it — v2 always opens the TTY for input automatically     |
+| `tui.WithANSICompressor()`    | Just remove it — the new renderer handles optimization automatically |
 
 ## Removed Commands
 
@@ -302,18 +302,18 @@ These commands no longer exist. Set the corresponding View field instead.
 
 | Removed Command             | Do This Instead                                           |
 | --------------------------- | --------------------------------------------------------- |
-| `tea.EnterAltScreen`        | `view.AltScreen = true`                                   |
-| `tea.ExitAltScreen`         | `view.AltScreen = false`                                  |
-| `tea.EnableMouseCellMotion` | `view.MouseMode = tea.MouseModeCellMotion`                |
-| `tea.EnableMouseAllMotion`  | `view.MouseMode = tea.MouseModeAllMotion`                 |
-| `tea.DisableMouse`          | `view.MouseMode = tea.MouseModeNone`                      |
-| `tea.HideCursor`            | `view.Cursor = nil`                                       |
-| `tea.ShowCursor`            | `view.Cursor = &tea.Cursor{...}` or `tea.NewCursor(x, y)` |
-| `tea.EnableBracketedPaste`  | `view.DisableBracketedPasteMode = false`                  |
-| `tea.DisableBracketedPaste` | `view.DisableBracketedPasteMode = true`                   |
-| `tea.EnableReportFocus`     | `view.ReportFocus = true`                                 |
-| `tea.DisableReportFocus`    | `view.ReportFocus = false`                                |
-| `tea.SetWindowTitle("...")` | `view.WindowTitle = "..."`                                |
+| `tui.EnterAltScreen`        | `view.AltScreen = true`                                   |
+| `tui.ExitAltScreen`         | `view.AltScreen = false`                                  |
+| `tui.EnableMouseCellMotion` | `view.MouseMode = tui.MouseModeCellMotion`                |
+| `tui.EnableMouseAllMotion`  | `view.MouseMode = tui.MouseModeAllMotion`                 |
+| `tui.DisableMouse`          | `view.MouseMode = tui.MouseModeNone`                      |
+| `tui.HideCursor`            | `view.Cursor = nil`                                       |
+| `tui.ShowCursor`            | `view.Cursor = &tui.Cursor{...}` or `tui.NewCursor(x, y)` |
+| `tui.EnableBracketedPaste`  | `view.DisableBracketedPasteMode = false`                  |
+| `tui.DisableBracketedPaste` | `view.DisableBracketedPasteMode = true`                   |
+| `tui.EnableReportFocus`     | `view.ReportFocus = true`                                 |
+| `tui.DisableReportFocus`    | `view.ReportFocus = false`                                |
+| `tui.SetWindowTitle("...")` | `view.WindowTitle = "..."`                                |
 
 ## Removed Program Methods
 
@@ -326,17 +326,17 @@ These methods on `*Program` are gone.
 | `p.EnterAltScreen()`         | `view.AltScreen = true` in `View()`              |
 | `p.ExitAltScreen()`          | `view.AltScreen = false` in `View()`             |
 | `p.EnableMouseCellMotion()`  | `view.MouseMode` in `View()`                     |
-| `p.DisableMouseCellMotion()` | `view.MouseMode = tea.MouseModeNone` in `View()` |
+| `p.DisableMouseCellMotion()` | `view.MouseMode = tui.MouseModeNone` in `View()` |
 | `p.EnableMouseAllMotion()`   | `view.MouseMode` in `View()`                     |
-| `p.DisableMouseAllMotion()`  | `view.MouseMode = tea.MouseModeNone` in `View()` |
+| `p.DisableMouseAllMotion()`  | `view.MouseMode = tui.MouseModeNone` in `View()` |
 | `p.SetWindowTitle(...)`      | `view.WindowTitle` in `View()`                   |
 
 ## Renamed APIs
 
 | v1                      | v2                      | Notes                                       |
 | ----------------------- | ----------------------- | ------------------------------------------- |
-| `tea.Sequentially(...)` | `tea.Sequence(...)`     | `Sequentially` was already deprecated in v1 |
-| `tea.WindowSize()`      | `tea.RequestWindowSize` | Now returns `Msg` directly, not a `Cmd`     |
+| `tui.Sequentially(...)` | `tui.Sequence(...)`     | `Sequentially` was already deprecated in v1 |
+| `tui.WindowSize()`      | `tui.RequestWindowSize` | Now returns `Msg` directly, not a `Cmd`     |
 
 ## New Program Options
 
@@ -344,8 +344,8 @@ These are new in v2:
 
 | Option                     | What It Does                                       |
 | -------------------------- | -------------------------------------------------- |
-| `tea.WithColorProfile(p)`  | Force a specific color profile (great for testing) |
-| `tea.WithWindowSize(w, h)` | Set initial terminal size (great for testing)      |
+| `tui.WithColorProfile(p)`  | Force a specific color profile (great for testing) |
+| `tui.WithWindowSize(w, h)` | Set initial terminal size (great for testing)      |
 
 ## Complete Before & After
 
@@ -360,28 +360,28 @@ import (
     "fmt"
     "os"
 
-    tea "github.com/carmel/go-tui"
+    "github.com/carmel/go-tui"
 )
 
 type model struct {
     count int
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
     return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
     switch msg := msg.(type) {
-    case tea.KeyMsg:
+    case tui.KeyMsg:
         switch msg.String() {
         case "q", "ctrl+c":
-            return m, tea.Quit
+            return m, tui.Quit
         case " ":
             m.count++
         }
-    case tea.MouseMsg:
-        if msg.Action == tea.MouseActionPress && msg.Button == tea.MouseButtonLeft {
+    case tui.MouseMsg:
+        if msg.Action == tui.MouseActionPress && msg.Button == tui.MouseButtonLeft {
             m.count++
         }
     }
@@ -393,7 +393,7 @@ func (m model) View() string {
 }
 
 func main() {
-    p := tea.NewProgram(model{}, tea.WithAltScreen(), tea.WithMouseCellMotion())
+    p := tui.NewProgram(model{}, tui.WithAltScreen(), tui.WithMouseCellMotion())
     if _, err := p.Run(); err != nil {
         fmt.Fprintln(os.Stderr, err)
         os.Exit(1)
@@ -410,43 +410,43 @@ import (
     "fmt"
     "os"
 
-    tea "github.com/carmel/go-tui"
+    "github.com/carmel/go-tui"
 )
 
 type model struct {
     count int
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
     return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
     switch msg := msg.(type) {
-    case tea.KeyPressMsg:
+    case tui.KeyPressMsg:
         switch msg.String() {
         case "q", "ctrl+c":
-            return m, tea.Quit
+            return m, tui.Quit
         case "space":
             m.count++
         }
-    case tea.MouseClickMsg:
-        if msg.Button == tea.MouseLeft {
+    case tui.MouseClickMsg:
+        if msg.Button == tui.MouseLeft {
             m.count++
         }
     }
     return m, nil
 }
 
-func (m model) View() tea.View {
-    v := tea.NewView(fmt.Sprintf("Count: %d\n\nSpace or click to increment. q to quit.\n", m.count))
+func (m model) View() tui.View {
+    v := tui.NewView(fmt.Sprintf("Count: %d\n\nSpace or click to increment. q to quit.\n", m.count))
     v.AltScreen = true
-    v.MouseMode = tea.MouseModeCellMotion
+    v.MouseMode = tui.MouseModeCellMotion
     return v
 }
 
 func main() {
-    p := tea.NewProgram(model{})
+    p := tui.NewProgram(model{})
     if _, err := p.Run(); err != nil {
         fmt.Fprintln(os.Stderr, err)
         os.Exit(1)
@@ -462,71 +462,71 @@ A flat old → new lookup table. Handy for search-and-replace and LLM-assisted m
 
 ### Import Paths
 
-| v1                                  | v2                         |
-| ----------------------------------- | -------------------------- |
-| `github.com/carmel/go-tui`          | `github.com/carmel/go-tui` |
-| `github.com/charmbracelet/lipgloss` | `charm.land/lipgloss/v2`   |
+| v1                                  | v2                                  |
+| ----------------------------------- | ----------------------------------- |
+| `github.com/carmel/go-tui`          | `github.com/carmel/go-tui`          |
+| `github.com/charmbracelet/lipgloss` | `github.com/carmel/go-tui/lipgloss` |
 
 ### Model Interface
 
 | v1              | v2                |
 | --------------- | ----------------- |
-| `View() string` | `View() tea.View` |
+| `View() string` | `View() tui.View` |
 
 ### Key Events
 
 | v1                    | v2                                                                        |
 | --------------------- | ------------------------------------------------------------------------- |
-| `tea.KeyMsg` (struct) | `tea.KeyPressMsg` for presses, `tea.KeyMsg` (interface) for both          |
+| `tui.KeyMsg` (struct) | `tui.KeyPressMsg` for presses, `tui.KeyMsg` (interface) for both          |
 | `msg.Type`            | `msg.Code`                                                                |
 | `msg.Runes`           | `msg.Text` (string, not `[]rune`)                                         |
-| `msg.Alt`             | `msg.Mod.Contains(tea.ModAlt)`                                            |
-| `tea.KeyRune`         | check `len(msg.Text) > 0`                                                 |
-| `tea.KeyCtrlC`        | `msg.Code == 'c' && msg.Mod == tea.ModCtrl` or `msg.String() == "ctrl+c"` |
+| `msg.Alt`             | `msg.Mod.Contains(tui.ModAlt)`                                            |
+| `tui.KeyRune`         | check `len(msg.Text) > 0`                                                 |
+| `tui.KeyCtrlC`        | `msg.Code == 'c' && msg.Mod == tui.ModCtrl` or `msg.String() == "ctrl+c"` |
 | `case " ":` (space)   | `case "space":`                                                           |
 
 ### Mouse Events
 
 | v1                         | v2                                                        |
 | -------------------------- | --------------------------------------------------------- |
-| `tea.MouseMsg` (struct)    | `tea.MouseMsg` (interface) — call `.Mouse()` for the data |
-| `tea.MouseEvent`           | `tea.Mouse`                                               |
-| `tea.MouseButtonLeft`      | `tea.MouseLeft`                                           |
-| `tea.MouseButtonRight`     | `tea.MouseRight`                                          |
-| `tea.MouseButtonMiddle`    | `tea.MouseMiddle`                                         |
-| `tea.MouseButtonWheelUp`   | `tea.MouseWheelUp`                                        |
-| `tea.MouseButtonWheelDown` | `tea.MouseWheelDown`                                      |
+| `tui.MouseMsg` (struct)    | `tui.MouseMsg` (interface) — call `.Mouse()` for the data |
+| `tui.MouseEvent`           | `tui.Mouse`                                               |
+| `tui.MouseButtonLeft`      | `tui.MouseLeft`                                           |
+| `tui.MouseButtonRight`     | `tui.MouseRight`                                          |
+| `tui.MouseButtonMiddle`    | `tui.MouseMiddle`                                         |
+| `tui.MouseButtonWheelUp`   | `tui.MouseWheelUp`                                        |
+| `tui.MouseButtonWheelDown` | `tui.MouseWheelDown`                                      |
 | `msg.X`, `msg.Y` (direct)  | `msg.Mouse().X`, `msg.Mouse().Y`                          |
 
 ### Options → View Fields
 
 | v1 Option                     | v2 View Field                              |
 | ----------------------------- | ------------------------------------------ |
-| `tea.WithAltScreen()`         | `view.AltScreen = true`                    |
-| `tea.WithMouseCellMotion()`   | `view.MouseMode = tea.MouseModeCellMotion` |
-| `tea.WithMouseAllMotion()`    | `view.MouseMode = tea.MouseModeAllMotion`  |
-| `tea.WithReportFocus()`       | `view.ReportFocus = true`                  |
-| `tea.WithoutBracketedPaste()` | `view.DisableBracketedPasteMode = true`    |
+| `tui.WithAltScreen()`         | `view.AltScreen = true`                    |
+| `tui.WithMouseCellMotion()`   | `view.MouseMode = tui.MouseModeCellMotion` |
+| `tui.WithMouseAllMotion()`    | `view.MouseMode = tui.MouseModeAllMotion`  |
+| `tui.WithReportFocus()`       | `view.ReportFocus = true`                  |
+| `tui.WithoutBracketedPaste()` | `view.DisableBracketedPasteMode = true`    |
 
 ### Commands → View Fields
 
 | v1 Command                                               | v2 View Field                                          |
 | -------------------------------------------------------- | ------------------------------------------------------ |
-| `tea.EnterAltScreen` / `tea.ExitAltScreen`               | `view.AltScreen = true/false`                          |
-| `tea.EnableMouseCellMotion`                              | `view.MouseMode = tea.MouseModeCellMotion`             |
-| `tea.EnableMouseAllMotion`                               | `view.MouseMode = tea.MouseModeAllMotion`              |
-| `tea.DisableMouse`                                       | `view.MouseMode = tea.MouseModeNone`                   |
-| `tea.HideCursor` / `tea.ShowCursor`                      | `view.Cursor = nil` / `view.Cursor = &tea.Cursor{...}` |
-| `tea.EnableBracketedPaste` / `tea.DisableBracketedPaste` | `view.DisableBracketedPasteMode = false/true`          |
-| `tea.EnableReportFocus` / `tea.DisableReportFocus`       | `view.ReportFocus = true/false`                        |
-| `tea.SetWindowTitle("...")`                              | `view.WindowTitle = "..."`                             |
+| `tui.EnterAltScreen` / `tui.ExitAltScreen`               | `view.AltScreen = true/false`                          |
+| `tui.EnableMouseCellMotion`                              | `view.MouseMode = tui.MouseModeCellMotion`             |
+| `tui.EnableMouseAllMotion`                               | `view.MouseMode = tui.MouseModeAllMotion`              |
+| `tui.DisableMouse`                                       | `view.MouseMode = tui.MouseModeNone`                   |
+| `tui.HideCursor` / `tui.ShowCursor`                      | `view.Cursor = nil` / `view.Cursor = &tui.Cursor{...}` |
+| `tui.EnableBracketedPaste` / `tui.DisableBracketedPaste` | `view.DisableBracketedPasteMode = false/true`          |
+| `tui.EnableReportFocus` / `tui.DisableReportFocus`       | `view.ReportFocus = true/false`                        |
+| `tui.SetWindowTitle("...")`                              | `view.WindowTitle = "..."`                             |
 
 ### Removed Options (No Replacement Needed)
 
 | v1 Option                  | What Happened                                       |
 | -------------------------- | --------------------------------------------------- |
-| `tea.WithInputTTY()`       | v2 always opens the TTY for input automatically     |
-| `tea.WithANSICompressor()` | The new renderer handles optimization automatically |
+| `tui.WithInputTTY()`       | v2 always opens the TTY for input automatically     |
+| `tui.WithANSICompressor()` | The new renderer handles optimization automatically |
 
 ### Removed Program Methods
 
@@ -537,24 +537,24 @@ A flat old → new lookup table. Handy for search-and-replace and LLM-assisted m
 | `p.EnterAltScreen()`         | `view.AltScreen = true` in `View()`              |
 | `p.ExitAltScreen()`          | `view.AltScreen = false` in `View()`             |
 | `p.EnableMouseCellMotion()`  | `view.MouseMode` in `View()`                     |
-| `p.DisableMouseCellMotion()` | `view.MouseMode = tea.MouseModeNone` in `View()` |
+| `p.DisableMouseCellMotion()` | `view.MouseMode = tui.MouseModeNone` in `View()` |
 | `p.EnableMouseAllMotion()`   | `view.MouseMode` in `View()`                     |
-| `p.DisableMouseAllMotion()`  | `view.MouseMode = tea.MouseModeNone` in `View()` |
+| `p.DisableMouseAllMotion()`  | `view.MouseMode = tui.MouseModeNone` in `View()` |
 | `p.SetWindowTitle(...)`      | `view.WindowTitle` in `View()`                   |
 
 ### Other Renames
 
 | v1                      | v2                                                     |
 | ----------------------- | ------------------------------------------------------ |
-| `tea.Sequentially(...)` | `tea.Sequence(...)`                                    |
-| `tea.WindowSize()`      | `tea.RequestWindowSize` (now returns `Msg`, not `Cmd`) |
+| `tui.Sequentially(...)` | `tui.Sequence(...)`                                    |
+| `tui.WindowSize()`      | `tui.RequestWindowSize` (now returns `Msg`, not `Cmd`) |
 
 ### New Program Options
 
 | Option                     | Description                                 |
 | -------------------------- | ------------------------------------------- |
-| `tea.WithColorProfile(p)`  | Force a specific color profile              |
-| `tea.WithWindowSize(w, h)` | Set initial window size (great for testing) |
+| `tui.WithColorProfile(p)`  | Force a specific color profile              |
+| `tui.WithWindowSize(w, h)` | Set initial window size (great for testing) |
 
 ## Feedback
 

@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 var lastID int64
@@ -35,7 +35,7 @@ func WithInterval(interval time.Duration) Option {
 // stop responding to TickMsgs. To start the model we'd set 'running' to true
 // and fire off a TickMsg. Helper functions would look like:
 //
-//     func (m *model) Start() tea.Cmd
+//     func (m *model) Start() tui.Cmd
 //     func (m *model) Stop()
 //
 // The danger with this approach, however, is that order of operations becomes
@@ -134,12 +134,12 @@ func (m Model) Timedout() bool {
 }
 
 // Init starts the timer.
-func (m Model) Init() tea.Cmd {
+func (m Model) Init() tui.Cmd {
 	return m.tick()
 }
 
 // Update handles the timer tick.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
 	switch msg := msg.(type) {
 	case StartStopMsg:
 		if msg.ID != 0 && msg.ID != m.id {
@@ -160,7 +160,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 
 		m.Timeout -= m.Interval
-		return m, tea.Batch(m.tick(), m.timedout())
+		return m, tui.Batch(m.tick(), m.timedout())
 	}
 
 	return m, nil
@@ -172,37 +172,37 @@ func (m Model) View() string {
 }
 
 // Start resumes the timer. Has no effect if the timer has timed out.
-func (m *Model) Start() tea.Cmd {
+func (m *Model) Start() tui.Cmd {
 	return m.startStop(true)
 }
 
 // Stop pauses the timer. Has no effect if the timer has timed out.
-func (m *Model) Stop() tea.Cmd {
+func (m *Model) Stop() tui.Cmd {
 	return m.startStop(false)
 }
 
 // Toggle stops the timer if it's running and starts it if it's stopped.
-func (m *Model) Toggle() tea.Cmd {
+func (m *Model) Toggle() tui.Cmd {
 	return m.startStop(!m.Running())
 }
 
-func (m Model) tick() tea.Cmd {
-	return tea.Tick(m.Interval, func(_ time.Time) tea.Msg {
+func (m Model) tick() tui.Cmd {
+	return tui.Tick(m.Interval, func(_ time.Time) tui.Msg {
 		return TickMsg{ID: m.id, tag: m.tag, Timeout: m.Timedout()}
 	})
 }
 
-func (m Model) timedout() tea.Cmd {
+func (m Model) timedout() tui.Cmd {
 	if !m.Timedout() {
 		return nil
 	}
-	return func() tea.Msg {
+	return func() tui.Msg {
 		return TimeoutMsg{ID: m.id}
 	}
 }
 
-func (m Model) startStop(v bool) tea.Cmd {
-	return func() tea.Msg {
+func (m Model) startStop(v bool) tui.Cmd {
+	return func() tui.Msg {
 		return StartStopMsg{ID: m.id, running: v}
 	}
 }

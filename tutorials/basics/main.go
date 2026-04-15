@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 type model struct {
@@ -25,16 +25,16 @@ func initialModel() model {
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return m, tui.Quit
 		case "up", "k":
 			if m.cursor > 0 {
 				m.cursor--
@@ -56,7 +56,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	s := "What should we buy at the market?\n\n"
 
 	for i, choice := range m.choices {
@@ -75,14 +75,14 @@ func (m model) View() tea.View {
 
 	s += "\nPress q to quit.\n"
 
-	v := tea.NewView(s)
+	v := tui.NewView(s)
 	v.WindowTitle = "Grocery List"
 
 	return v
 }
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)

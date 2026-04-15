@@ -1,5 +1,5 @@
 // Package viewport provides a component for rendering a viewport in a Bubble
-// Tea.
+// tui.
 package viewport
 
 import "github.com/carmel/go-tui/key"

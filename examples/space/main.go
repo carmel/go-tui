@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 // An example to show the FPS count of a moving space-like background.
@@ -26,29 +26,29 @@ type model struct {
 	height     int
 }
 
-func (m model) Init() tea.Cmd {
-	return tea.Batch(
+func (m model) Init() tui.Cmd {
+	return tui.Batch(
 		tickCmd(),
 	)
 }
 
-func tickCmd() tea.Cmd {
-	return tea.Tick(time.Second/60, func(time.Time) tea.Msg {
+func tickCmd() tui.Cmd {
+	return tui.Tick(time.Second/60, func(time.Time) tui.Msg {
 		return tickMsg{}
 	})
 }
 
 type tickMsg struct{}
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 		if m.width != m.lastWidth || m.height != m.lastHeight {
@@ -95,7 +95,7 @@ func clamp(value, min, max float64) float64 {
 	return value
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	// Title
 	title := lipgloss.NewStyle().Bold(true).Render("Space")
 
@@ -115,7 +115,7 @@ func (m model) View() tea.View {
 		}
 	}
 
-	v := tea.NewView(strings.Join([]string{
+	v := tui.NewView(strings.Join([]string{
 		title,
 		s.String(),
 	}, "\n"))
@@ -124,7 +124,7 @@ func (m model) View() tea.View {
 }
 
 func main() {
-	p := tea.NewProgram(model{}, tea.WithFPS(120))
+	p := tui.NewProgram(model{}, tui.WithFPS(120))
 
 	_, err := p.Run()
 	if err != nil {

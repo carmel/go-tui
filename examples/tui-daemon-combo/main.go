@@ -9,8 +9,8 @@ import (
 	"os"
 	"time"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/spinner"
 	"github.com/charmbracelet/x/term"
 )
@@ -35,16 +35,16 @@ func main() {
 		os.Exit(0)
 	}
 
-	opts := []tea.ProgramOption{}
+	opts := []tui.ProgramOption{}
 	if daemonMode || !term.IsTerminal(os.Stdout.Fd()) {
 		// If we're in daemon mode don't render the TUI
-		opts = append(opts, tea.WithoutRenderer())
+		opts = append(opts, tui.WithoutRenderer())
 	} else {
 		// If we're in TUI mode, discard log output
 		log.SetOutput(io.Discard)
 	}
 
-	p := tea.NewProgram(newModel(), opts...)
+	p := tui.NewProgram(newModel(), opts...)
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error starting Bubble Tea program:", err)
 		os.Exit(1)
@@ -74,21 +74,21 @@ func newModel() model {
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	log.Println("Starting work...")
-	return tea.Batch(
+	return tui.Batch(
 		m.spinner.Tick,
 		runPretendProcess,
 	)
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		m.quitting = true
-		return m, tea.Quit
+		return m, tui.Quit
 	case spinner.TickMsg:
-		var cmd tea.Cmd
+		var cmd tui.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
 	case processFinishedMsg:
@@ -102,7 +102,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	s := "\n" +
 		m.spinner.View() + " Doing some work...\n\n"
 
@@ -120,14 +120,14 @@ func (m model) View() tea.View {
 		s += "\n"
 	}
 
-	return tea.NewView(mainStyle.Render(s))
+	return tui.NewView(mainStyle.Render(s))
 }
 
 // processFinishedMsg is sent when a pretend process completes.
 type processFinishedMsg time.Duration
 
 // pretendProcess simulates a long-running process.
-func runPretendProcess() tea.Msg {
+func runPretendProcess() tui.Msg {
 	pause := time.Duration(rand.Int63n(899)+100) * time.Millisecond // nolint:gosec
 	time.Sleep(pause)
 	return processFinishedMsg(pause)

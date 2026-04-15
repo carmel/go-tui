@@ -5,11 +5,11 @@ package main
 import (
 	"log"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 func main() {
-	p := tea.NewProgram(model{
+	p := tui.NewProgram(model{
 		focused:   true,
 		reporting: true,
 	})
@@ -23,29 +23,29 @@ type model struct {
 	reporting bool
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.FocusMsg:
+	case tui.FocusMsg:
 		m.focused = true
-	case tea.BlurMsg:
+	case tui.BlurMsg:
 		m.focused = false
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "t":
 			m.reporting = !m.reporting
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	s := "Hi. Focus report is currently "
 	if m.reporting {
 		s += "enabled"
@@ -61,7 +61,7 @@ func (m model) View() tea.View {
 			s += "This program is currently blurred!"
 		}
 	}
-	v := tea.NewView(s + "\n\nTo quit sooner press ctrl-c, or t to toggle focus reporting...\n")
+	v := tui.NewView(s + "\n\nTo quit sooner press ctrl-c, or t to toggle focus reporting...\n")
 	v.ReportFocus = m.reporting
 	return v
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/table"
 )
 
@@ -17,12 +17,12 @@ type model struct {
 	table table.Model
 }
 
-func (m model) Init() tea.Cmd { return nil }
+func (m model) Init() tui.Cmd { return nil }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmd tui.Cmd
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "esc":
 			if m.table.Focused() {
@@ -31,10 +31,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.table.Focus()
 			}
 		case "q", "ctrl+c":
-			return m, tea.Quit
+			return m, tui.Quit
 		case "enter":
-			return m, tea.Batch(
-				tea.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
+			return m, tui.Batch(
+				tui.Printf("Let's go to %s!", m.table.SelectedRow()[1]),
 			)
 		}
 	}
@@ -42,8 +42,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() tea.View {
-	return tea.NewView(baseStyle.Render(m.table.View()) + "\n  " + m.table.HelpView() + "\n")
+func (m model) View() tui.View {
+	return tui.NewView(baseStyle.Render(m.table.View()) + "\n  " + m.table.HelpView() + "\n")
 }
 
 func main() {
@@ -178,7 +178,7 @@ func main() {
 	t.SetStyles(s)
 
 	m := model{t}
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tui.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

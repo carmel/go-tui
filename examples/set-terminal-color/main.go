@@ -5,8 +5,8 @@ import (
 	"log"
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textinput"
 	"github.com/lucasb-eyer/go-colorful"
 )
@@ -48,16 +48,16 @@ type model struct {
 	fg, bg, cc  color.Color
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return textinput.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 
 		switch m.state {
@@ -124,7 +124,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.ti.Blur()
 
 			default:
-				var cmd tea.Cmd
+				var cmd tui.Cmd
 				m.ti, cmd = m.ti.Update(msg)
 				return m, cmd
 			}
@@ -134,7 +134,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	var s strings.Builder
 	instructions := lipgloss.NewStyle().Width(40).Render("Choose a terminal-wide color to set. All settings will be cleared on exit.")
 
@@ -172,7 +172,7 @@ func (m model) View() tea.View {
 
 	s.WriteString("\n")
 
-	v := tea.NewView(s.String())
+	v := tui.NewView(s.String())
 	if m.ti.Focused() {
 		v.Cursor = m.ti.Cursor()
 		v.Cursor.Y += 2 // account for the prompt
@@ -190,7 +190,7 @@ func main() {
 	ti.CharLimit = 156
 	ti.SetWidth(20)
 	ti.SetVirtualCursor(false)
-	p := tea.NewProgram(model{
+	p := tui.NewProgram(model{
 		ti: ti,
 	})
 

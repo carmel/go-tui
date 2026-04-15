@@ -34,14 +34,14 @@ type clearScreenMsg struct{}
 // Example:
 //
 //	```go
-//	func (m model) Init() tea.Cmd {
+//	func (m model) Init() tui.Cmd {
 //	  // Does my terminal support reporting focus events?
-//	  return tea.Raw(ansi.RequestModeFocusEvent)
+//	  return tui.Raw(ansi.RequestModeFocusEvent)
 //	}
 //
-//	func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+//	func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 //	  switch msg := msg.(type) {
-//	  case tea.ModeReportMsg:
+//	  case tui.ModeReportMsg:
 //	    if msg.Mode == ansi.ModeFocusEvent && !msg.Value.IsNotRecognized() {
 //	      // Terminal supports focus events
 //	      m.supportsFocus = true
@@ -50,8 +50,8 @@ type clearScreenMsg struct{}
 //	  return m, nil
 //	}
 //
-//	func (m model) View() tea.View {
-//	  var view tea.View
+//	func (m model) View() tui.View {
+//	  var view tui.View
 //	  view.ReportFocus = m.supportsFocus
 //	  view.SetContent(fmt.Sprintf("Terminal supports focus events: %v", m.supportsFocus))
 //	  return view

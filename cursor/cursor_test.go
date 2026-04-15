@@ -10,7 +10,7 @@ import (
 //
 // The original [Model.Blink] implementation returned a closure over the pointer receiver:
 //
-//	return func() tea.Msg {
+//	return func() tui.Msg {
 //		defer cancel()
 //		<-ctx.Done()
 //		if ctx.Err() == context.DeadlineExceeded {
@@ -21,12 +21,12 @@ import (
 //
 // A race on “m.blinkTag” will occur if:
 //  1. [Model.Blink] is called e.g. by calling [Model.Focus] from
-//     ["github.com/carmel/go-tui".Model.Update];
-//  2. ["github.com/carmel/go-tui".handleCommands] is kept sufficiently busy that it does not receive and
+//     [""github.com/carmel/go-tui".Model.Update];
+//  2. [""github.com/carmel/go-tui".handleCommands] is kept sufficiently busy that it does not receive and
 //     execute the [Model.BlinkCmd] e.g. by other long running command or commands;
 //  3. at least [Mode.BlinkSpeed] time elapses;
 //  4. [Model.Blink] is called again;
-//  5. ["github.com/carmel/go-tui".handleCommands] gets around to receiving and executing the original
+//  5. [""github.com/carmel/go-tui".handleCommands] gets around to receiving and executing the original
 //     closure.
 //
 // Even if this did not formally race, the value of the tag fetched would be semantically incorrect (likely being the

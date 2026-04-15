@@ -18,9 +18,9 @@
 //	    ),
 //	}
 //
-//	func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+//	func (m Model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 //	    switch msg := msg.(type) {
-//	    case tea.KeyPressMsg:
+//	    case tui.KeyPressMsg:
 //	        switch {
 //	        case key.Matches(msg, DefaultKeyMap.Up):
 //	            // The user pressed up

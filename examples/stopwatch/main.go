@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/help"
 	"github.com/carmel/go-tui/key"
 	"github.com/carmel/go-tui/stopwatch"
@@ -25,11 +25,11 @@ type keymap struct {
 	quit  key.Binding
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return m.stopwatch.Init()
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	// Note: you could further customize the time output by getting the
 	// duration from m.stopwatch.Elapsed(), which returns a time.Duration, and
 	// skip m.stopwatch.View() altogether.
@@ -38,7 +38,7 @@ func (m model) View() tea.View {
 		s = "Elapsed: " + s
 		s += m.helpView()
 	}
-	return tea.NewView(s)
+	return tui.NewView(s)
 }
 
 func (m model) helpView() string {
@@ -50,13 +50,13 @@ func (m model) helpView() string {
 	})
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.keymap.quit):
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		case key.Matches(msg, m.keymap.reset):
 			return m, m.stopwatch.Reset()
 		case key.Matches(msg, m.keymap.start, m.keymap.stop):
@@ -65,7 +65,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.stopwatch.Toggle()
 		}
 	}
-	var cmd tea.Cmd
+	var cmd tui.Cmd
 	m.stopwatch, cmd = m.stopwatch.Update(msg)
 	return m, cmd
 }
@@ -96,7 +96,7 @@ func main() {
 
 	m.keymap.start.SetEnabled(false)
 
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tui.NewProgram(m).Run(); err != nil {
 		fmt.Println("Oh no, it didn't work:", err)
 		os.Exit(1)
 	}

@@ -9,8 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/charmbracelet/harmonica"
 	"github.com/charmbracelet/x/ansi"
 )
@@ -147,7 +147,7 @@ func WithoutPercentage() Option {
 
 // WithWidth sets the initial width of the progress bar. Note that you can also
 // set the width via the Width property, which can come in handy if you're
-// waiting for a tea.WindowSizeMsg.
+// waiting for a tui.WindowSizeMsg.
 func WithWidth(w int) Option {
 	return func(m *Model) {
 		m.SetWidth(w)
@@ -252,8 +252,8 @@ func New(opts ...Option) Model {
 	return m
 }
 
-// Init exists to satisfy the tea.Model interface.
-func (m Model) Init() tea.Cmd {
+// Init exists to satisfy the tui.Model interface.
+func (m Model) Init() tui.Cmd {
 	return nil
 }
 
@@ -261,7 +261,7 @@ func (m Model) Init() tea.Cmd {
 // SetPercent to create the command you'll need to trigger the animation.
 //
 // If you're rendering with ViewAs you won't need this.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
 	switch msg := msg.(type) {
 	case FrameMsg:
 		if msg.id != m.id || msg.tag != m.tag {
@@ -301,7 +301,7 @@ func (m Model) Percent() float64 {
 // necessary for animating the progress bar to this new percentage.
 //
 // If you're rendering with ViewAs you won't need this.
-func (m *Model) SetPercent(p float64) tea.Cmd {
+func (m *Model) SetPercent(p float64) tui.Cmd {
 	m.targetPercent = math.Max(0, math.Min(1, p))
 	m.tag++
 	return m.nextFrame()
@@ -311,7 +311,7 @@ func (m *Model) SetPercent(p float64) tea.Cmd {
 // necessary to animate the progress bar to the new percentage.
 //
 // If you're rendering with ViewAs you won't need this.
-func (m *Model) IncrPercent(v float64) tea.Cmd {
+func (m *Model) IncrPercent(v float64) tui.Cmd {
 	return m.SetPercent(m.Percent() + v)
 }
 
@@ -319,7 +319,7 @@ func (m *Model) IncrPercent(v float64) tea.Cmd {
 // necessary to animate the progress bar to the new percentage.
 //
 // If you're rendering with ViewAs you won't need this.
-func (m *Model) DecrPercent(v float64) tea.Cmd {
+func (m *Model) DecrPercent(v float64) tui.Cmd {
 	return m.SetPercent(m.Percent() - v)
 }
 
@@ -348,8 +348,8 @@ func (m Model) Width() int {
 	return m.width
 }
 
-func (m *Model) nextFrame() tea.Cmd {
-	return tea.Tick(time.Second/time.Duration(fps), func(time.Time) tea.Msg {
+func (m *Model) nextFrame() tui.Cmd {
+	return tui.Tick(time.Second/time.Duration(fps), func(time.Time) tui.Msg {
 		return FrameMsg{id: m.id, tag: m.tag}
 	})
 }

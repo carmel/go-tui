@@ -8,12 +8,12 @@ import (
 	"strings"
 	"unicode"
 
-	"charm.land/lipgloss/v2"
 	"github.com/atotto/clipboard"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/cursor"
 	"github.com/carmel/go-tui/internal/runeutil"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 	rw "github.com/mattn/go-runewidth"
 	"github.com/rivo/uniseg"
 )
@@ -265,7 +265,7 @@ func (m Model) Focused() bool {
 
 // Focus sets the focus state on the model. When the model is in focus it can
 // receive keyboard input and the cursor will be shown.
-func (m *Model) Focus() tea.Cmd {
+func (m *Model) Focus() tui.Cmd {
 	m.focus = true
 	return m.virtualCursor.Focus()
 }
@@ -577,13 +577,13 @@ func (m Model) echoTransform(v string) string {
 }
 
 // Update is the Bubble Tea update loop.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
 	if !m.focus {
 		return m, nil
 	}
 
 	// Need to check for completion before, because key is configurable and might be double assigned
-	keyMsg, ok := msg.(tea.KeyPressMsg)
+	keyMsg, ok := msg.(tui.KeyPressMsg)
 	if ok && key.Matches(keyMsg, m.KeyMap.AcceptSuggestion) {
 		if m.canAcceptSuggestion() {
 			m.value = append(m.value, m.matchedSuggestions[m.currentSuggestionIndex][len(m.value):]...)
@@ -596,7 +596,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	oldPos := m.pos
 
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.KeyMap.DeleteWordBackward):
 			m.deleteWordBackward()
@@ -651,7 +651,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		// because value might be something that does not match the completion prefix
 		m.updateSuggestions()
 
-	case tea.PasteMsg:
+	case tui.PasteMsg:
 		m.insertRunesFromUserInput([]rune(msg.Content))
 
 	case pasteMsg:
@@ -661,8 +661,8 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.Err = msg
 	}
 
-	var cmds []tea.Cmd
-	var cmd tea.Cmd
+	var cmds []tui.Cmd
+	var cmd tui.Cmd
 
 	if m.useVirtualCursor {
 		m.virtualCursor, cmd = m.virtualCursor.Update(msg)
@@ -677,7 +677,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 
 	m.handleOverflow()
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
 // View renders the textinput in its current state.
@@ -780,12 +780,12 @@ func (m Model) placeholderView() string {
 }
 
 // Blink is a command used to initialize cursor blinking.
-func Blink() tea.Msg {
+func Blink() tui.Msg {
 	return cursor.Blink()
 }
 
 // Paste is a command for pasting from the clipboard into the text input.
-func Paste() tea.Msg {
+func Paste() tui.Msg {
 	str, err := clipboard.ReadAll()
 	if err != nil {
 		return pasteErrMsg{err}
@@ -900,7 +900,7 @@ func (m Model) validate(v []rune) error {
 	return nil
 }
 
-// Cursor returns a [tea.Cursor] for rendering a real cursor in a Bubble Tea
+// Cursor returns a [tui.Cursor] for rendering a real cursor in a Bubble Tea
 // program. This requires that [Model.VirtualCursor] is set to false.
 //
 // Note that you will almost certainly also need to adjust the offset cursor
@@ -909,11 +909,11 @@ func (m Model) validate(v []rune) error {
 // Example:
 //
 //	// In your top-level View function:
-//	f := tea.NewFrame(m.textarea.View())
+//	f := tui.NewFrame(m.textarea.View())
 //	f.Cursor = m.textarea.Cursor()
 //	f.Cursor.Position.X += offsetX
 //	f.Cursor.Position.Y += offsetY
-func (m Model) Cursor() *tea.Cursor {
+func (m Model) Cursor() *tui.Cursor {
 	if m.useVirtualCursor || !m.Focused() {
 		return nil
 	}
@@ -928,7 +928,7 @@ func (m Model) Cursor() *tea.Cursor {
 	}
 
 	style := m.styles.Cursor
-	c := tea.NewCursor(xOffset, 0)
+	c := tui.NewCursor(xOffset, 0)
 	c.Blink = style.Blink
 	c.Color = style.Color
 	c.Shape = style.Shape

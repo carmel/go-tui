@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 type item string
@@ -19,7 +19,7 @@ type itemDelegate struct{}
 
 func (d itemDelegate) Height() int                          { return 1 }
 func (d itemDelegate) Spacing() int                         { return 0 }
-func (d itemDelegate) Update(msg tea.Msg, m *Model) tea.Cmd { return nil }
+func (d itemDelegate) Update(msg tui.Msg, m *Model) tui.Cmd { return nil }
 func (d itemDelegate) Render(w io.Writer, m Model, index int, listItem Item) {
 	i, ok := listItem.(item)
 	if !ok {

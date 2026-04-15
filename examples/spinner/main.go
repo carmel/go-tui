@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/spinner"
 )
 
@@ -27,17 +27,17 @@ func initialModel() model {
 	return model{spinner: s}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return m.spinner.Tick
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "esc", "ctrl+c":
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		default:
 			return m, nil
 		}
@@ -47,25 +47,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 
 	default:
-		var cmd tea.Cmd
+		var cmd tui.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
 	}
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.err != nil {
-		return tea.NewView(m.err.Error())
+		return tui.NewView(m.err.Error())
 	}
 	str := fmt.Sprintf("\n\n   %s Loading forever...press q to quit\n\n", m.spinner.View())
 	if m.quitting {
-		return tea.NewView(str + "\n")
+		return tui.NewView(str + "\n")
 	}
-	return tea.NewView(str)
+	return tui.NewView(str)
 }
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)

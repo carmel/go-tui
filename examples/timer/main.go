@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/help"
 	"github.com/carmel/go-tui/key"
 	"github.com/carmel/go-tui/timer"
@@ -27,19 +27,19 @@ type keymap struct {
 	quit  key.Binding
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return m.timer.Init()
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
 	case timer.TickMsg:
-		var cmd tea.Cmd
+		var cmd tui.Cmd
 		m.timer, cmd = m.timer.Update(msg)
 		return m, cmd
 
 	case timer.StartStopMsg:
-		var cmd tea.Cmd
+		var cmd tui.Cmd
 		m.timer, cmd = m.timer.Update(msg)
 		m.keymap.stop.SetEnabled(m.timer.Running())
 		m.keymap.start.SetEnabled(!m.timer.Running())
@@ -47,13 +47,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case timer.TimeoutMsg:
 		m.quitting = true
-		return m, tea.Quit
+		return m, tui.Quit
 
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.keymap.quit):
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		case key.Matches(msg, m.keymap.reset):
 			m.timer.Timeout = timeout
 		case key.Matches(msg, m.keymap.start, m.keymap.stop):
@@ -73,7 +73,7 @@ func (m model) helpView() string {
 	})
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	// For a more detailed timer view you could read m.timer.Timeout to get
 	// the remaining time as a time.Duration and skip calling m.timer.View()
 	// entirely.
@@ -87,7 +87,7 @@ func (m model) View() tea.View {
 		s = "Exiting in " + s
 		s += m.helpView()
 	}
-	return tea.NewView(s)
+	return tui.NewView(s)
 }
 
 func main() {
@@ -115,7 +115,7 @@ func main() {
 	}
 	m.keymap.start.SetEnabled(false)
 
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tui.NewProgram(m).Run(); err != nil {
 		fmt.Println("Uh oh, we encountered an error:", err)
 		os.Exit(1)
 	}

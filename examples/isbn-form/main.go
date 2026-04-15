@@ -6,14 +6,14 @@ import (
 	"strings"
 	"unicode"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textinput"
 	"github.com/charmbracelet/x/exp/charmtone"
 )
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
@@ -152,13 +152,13 @@ func initialModel() model {
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return textinput.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "up", "down":
 			// Switch between text inputs
@@ -175,10 +175,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "enter":
 			// Enter is blocked until all inputs are ok
 			if m.canFindBook() {
-				return m, tea.Quit
+				return m, tui.Quit
 			}
 		case "ctrl+c", "esc":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 
 	// We handle errors just like any other message
@@ -187,16 +187,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 
-	var isbnCommand tea.Cmd
+	var isbnCommand tui.Cmd
 	m.isbnInput, isbnCommand = m.isbnInput.Update(msg)
 
-	var titleCommand tea.Cmd
+	var titleCommand tui.Cmd
 	m.titleInput, titleCommand = m.titleInput.Update(msg)
 
-	return m, tea.Batch(isbnCommand, titleCommand)
+	return m, tui.Batch(isbnCommand, titleCommand)
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	var continueText string
 	if m.canFindBook() {
 		continueText = continueStyle.Render("Find ->")
@@ -220,7 +220,7 @@ func (m model) View() tea.View {
 		}
 	}
 
-	return tea.NewView(fmt.Sprintf(
+	return tui.NewView(fmt.Sprintf(
 		` Search book:
  %s
  %s

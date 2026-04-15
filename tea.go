@@ -71,7 +71,7 @@ type Model interface {
 // Example:
 //
 //	```go
-//	v := tea.NewView("Hello, World!")
+//	v := tui.NewView("Hello, World!")
 //	```
 func NewView(s string) View {
 	var view View
@@ -91,22 +91,22 @@ type View struct {
 	// Example:
 	//
 	//  ```go
-	//  v := tea.NewView("Hello, World!")
+	//  v := tui.NewView("Hello, World!")
 	//  ```
 	Content string
 
 	// OnMouse is an optional mouse message handler that can be used to
 	// intercept mouse messages that depends on view content from last render.
 	// It can be useful for implementing view-specific behavior without
-	// breaking the unidirectional data flow of Bubble Tea.
+	// breaking the unidirectional data flow of Bubble tui.
 	//
 	// Example:
 	//
 	//  ```go
 	//  content := "Hello, World!"
-	//  v := tea.NewView(content)
-	//  v.OnMouse = func(msg tea.MouseMsg) tea.Cmd {
-	//      return func() tea.Msg {
+	//  v := tui.NewView(content)
+	//  v.OnMouse = func(msg tui.MouseMsg) tui.Cmd {
+	//      return func() tui.Msg {
 	//        m := msg.Mouse()
 	//        // Check if the mouse is within the bounds of "World!"
 	//        start := strings.Index(content, "World!")
@@ -152,8 +152,8 @@ type View struct {
 	//
 	// Example:
 	//
-	//	func (m model) View() tea.View {
-	//	    v := tea.NewView("Hello, World!")
+	//	func (m model) View() tui.View {
+	//	    v := tui.NewView("Hello, World!")
 	//	    v.AltScreen = true
 	//	    return v
 	//	}
@@ -207,16 +207,16 @@ type View struct {
 // Example:
 //
 //	```go
-//	func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+//	func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 //	  switch msg := msg.(type) {
-//	  case tea.KeyboardEnhancementsMsg:
+//	  case tui.KeyboardEnhancementsMsg:
 //	    // We have basic key disambiguation support.
 //	    // We can handle "shift+enter", "ctrl+i", etc.
 //		m.keyboardEnhancements = msg
 //		if msg.ReportEventTypes {
 //		  // Even better! We can now handle key repeat and release events.
 //		}
-//	  case tea.KeyPressMsg:
+//	  case tui.KeyPressMsg:
 //	    switch msg.String() {
 //	    case "shift+enter":
 //	      // Handle shift+enter
@@ -224,15 +224,15 @@ type View struct {
 //	    case "ctrl+j":
 //	      // Handle ctrl+j
 //	    }
-//	  case tea.KeyReleaseMsg:
+//	  case tui.KeyReleaseMsg:
 //	    // Whoa! A key was released!
 //	  }
 //
 //	  return m, nil
 //	}
 //
-//	func (m model) View() tea.View {
-//	  v := tea.NewView("Press some keys!")
+//	func (m model) View() tui.View {
+//	  v := tui.NewView("Press some keys!")
 //	  // Request reporting key repeat and release events.
 //	  v.KeyboardEnhancements.ReportEventTypes = true
 //	  return v
@@ -273,7 +273,7 @@ type KeyboardEnhancements struct {
 // Example:
 //
 //	```go
-//	var v tea.View
+//	var v tui.View
 //	v.SetContent("Hello, World!")
 //	```
 func (v *View) SetContent(s string) {
@@ -439,7 +439,7 @@ type Program struct {
 	disableCatchPanics bool
 
 	// filter supplies an event filter that will be invoked before Bubble Tea
-	// processes a tea.Msg. The event filter can return any tea.Msg which will
+	// processes a tui.Msg. The event filter can return any tui.Msg which will
 	// then get handled by Bubble Tea instead of the original event. If the
 	// event filter returns nil, the event will be ignored and Bubble Tea will
 	// not process it.
@@ -449,8 +449,8 @@ type Program struct {
 	//
 	// Example:
 	//
-	//	func filter(m tea.Model, msg tea.Msg) tea.Msg {
-	//		if _, ok := msg.(tea.QuitMsg); !ok {
+	//	func filter(m tui.Model, msg tui.Msg) tui.Msg {
+	//		if _, ok := msg.(tui.QuitMsg); !ok {
 	//			return msg
 	//		}
 	//
@@ -462,7 +462,7 @@ type Program struct {
 	//		return msg
 	//	}
 	//
-	//	p := tea.NewProgram(Model{});
+	//	p := tui.NewProgram(Model{});
 	//	p.filter = filter
 	//
 	//	if _,err := p.Run(context.Background()); err != nil {

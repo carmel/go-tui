@@ -6,9 +6,9 @@ import (
 	"testing"
 	"unicode"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
 	"github.com/MakeNowJust/heredoc"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 )
 
@@ -237,7 +237,7 @@ func TestVerticalNavigationKeepsCursorHorizontalPosition(t *testing.T) {
 		t.Fatal("Expected cursor to be on the fourth character because there are two double width runes on the first line.")
 	}
 
-	downMsg := tea.KeyPressMsg{Code: tea.KeyDown}
+	downMsg := tui.KeyPressMsg{Code: tui.KeyDown}
 	textarea, _ = textarea.Update(downMsg)
 
 	lineInfo = textarea.LineInfo()
@@ -276,7 +276,7 @@ func TestVerticalNavigationShouldRememberPositionWhileTraversing(t *testing.T) {
 	}
 
 	// Let's go up.
-	upMsg := tea.KeyPressMsg{Code: tea.KeyUp}
+	upMsg := tui.KeyPressMsg{Code: tui.KeyUp}
 	textarea, _ = textarea.Update(upMsg)
 
 	// We should be at the end of the second line.
@@ -295,7 +295,7 @@ func TestVerticalNavigationShouldRememberPositionWhileTraversing(t *testing.T) {
 	}
 
 	// Let's go down, twice.
-	downMsg := tea.KeyPressMsg{Code: tea.KeyDown}
+	downMsg := tui.KeyPressMsg{Code: tui.KeyDown}
 	textarea, _ = textarea.Update(downMsg)
 	textarea, _ = textarea.Update(downMsg)
 
@@ -311,7 +311,7 @@ func TestVerticalNavigationShouldRememberPositionWhileTraversing(t *testing.T) {
 	// work.
 
 	textarea, _ = textarea.Update(upMsg)
-	leftMsg := tea.KeyPressMsg{Code: tea.KeyLeft}
+	leftMsg := tui.KeyPressMsg{Code: tui.KeyLeft}
 	textarea, _ = textarea.Update(leftMsg)
 
 	if textarea.col != 4 || textarea.row != 1 {
@@ -1941,10 +1941,10 @@ func TestWord(t *testing.T) {
 	})
 
 	t.Run("navigate", func(t *testing.T) {
-		for _, k := range []tea.KeyPressMsg{
-			{Code: tea.KeyLeft, Mod: tea.ModAlt, Text: "alt+left"},
-			{Code: tea.KeyLeft, Mod: tea.ModAlt, Text: "alt+left"},
-			{Code: tea.KeyRight, Text: "right"},
+		for _, k := range []tui.KeyPressMsg{
+			{Code: tui.KeyLeft, Mod: tui.ModAlt, Text: "alt+left"},
+			{Code: tui.KeyLeft, Mod: tui.ModAlt, Text: "alt+left"},
+			{Code: tui.KeyRight, Text: "right"},
 		} {
 			textarea, _ = textarea.Update(k)
 			textarea.View()
@@ -1957,11 +1957,11 @@ func TestWord(t *testing.T) {
 	})
 
 	t.Run("delete", func(t *testing.T) {
-		for _, k := range []tea.KeyPressMsg{
-			{Code: tea.KeyEnd, Text: "end"},
-			{Code: tea.KeyBackspace, Mod: tea.ModAlt, Text: "alt+backspace"},
-			{Code: tea.KeyBackspace, Mod: tea.ModAlt, Text: "alt+backspace"},
-			{Code: tea.KeyBackspace, Text: "backspace"},
+		for _, k := range []tui.KeyPressMsg{
+			{Code: tui.KeyEnd, Text: "end"},
+			{Code: tui.KeyBackspace, Mod: tui.ModAlt, Text: "alt+backspace"},
+			{Code: tui.KeyBackspace, Mod: tui.ModAlt, Text: "alt+backspace"},
+			{Code: tui.KeyBackspace, Text: "backspace"},
 		} {
 			textarea, _ = textarea.Update(k)
 			textarea.View()
@@ -2009,7 +2009,7 @@ func TestDynamicHeight_GrowsOnNewline(t *testing.T) {
 		t.Errorf("expected height 1 after single char, got %d", ta.Height())
 	}
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	ta, _ = ta.Update(enter)
 	if ta.Height() != 2 {
 		t.Errorf("expected height 2 after first newline, got %d", ta.Height())
@@ -2037,7 +2037,7 @@ func TestDynamicHeight_GrowsOnSoftWrap(t *testing.T) {
 func TestDynamicHeight_ShrinksOnLineDeletion(t *testing.T) {
 	ta := newDynamicTextArea(1, 20)
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	ta, _ = ta.Update(keyPress('a'))
 	ta, _ = ta.Update(enter)
 	ta, _ = ta.Update(keyPress('b'))
@@ -2050,7 +2050,7 @@ func TestDynamicHeight_ShrinksOnLineDeletion(t *testing.T) {
 
 	// Backspace at start of line 3 merges with line 2
 	ta.CursorStart()
-	backspace := tea.KeyPressMsg{Code: tea.KeyBackspace}
+	backspace := tui.KeyPressMsg{Code: tui.KeyBackspace}
 	ta, _ = ta.Update(backspace)
 
 	if ta.Height() != 2 {
@@ -2071,7 +2071,7 @@ func TestDynamicHeight_RespectsMinHeight(t *testing.T) {
 func TestDynamicHeight_RespectsMaxHeight(t *testing.T) {
 	ta := newDynamicTextArea(1, 5)
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	for range 10 {
 		ta, _ = ta.Update(keyPress('x'))
 		ta, _ = ta.Update(enter)
@@ -2085,7 +2085,7 @@ func TestDynamicHeight_RespectsMaxHeight(t *testing.T) {
 func TestDynamicHeight_GrowsOnPaste(t *testing.T) {
 	ta := newDynamicTextArea(1, 20)
 
-	paste := tea.PasteMsg{Content: "line1\nline2\nline3\nline4\nline5"}
+	paste := tui.PasteMsg{Content: "line1\nline2\nline3\nline4\nline5"}
 	ta, _ = ta.Update(paste)
 
 	if ta.Height() != 5 {
@@ -2124,7 +2124,7 @@ func TestDynamicHeight_RecalculatesOnSetValue(t *testing.T) {
 func TestDynamicHeight_CursorPositionAfterGrow(t *testing.T) {
 	ta := newDynamicTextArea(1, 20)
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	for i := range 5 {
 		ta, _ = ta.Update(keyPress(rune('a' + i)))
 		ta, _ = ta.Update(enter)
@@ -2148,7 +2148,7 @@ func TestDynamicHeight_CursorPositionAfterGrow(t *testing.T) {
 func TestDynamicHeight_CursorPositionAfterShrink(t *testing.T) {
 	ta := newDynamicTextArea(1, 20)
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	for i := range 5 {
 		ta, _ = ta.Update(keyPress(rune('a' + i)))
 		ta, _ = ta.Update(enter)
@@ -2160,7 +2160,7 @@ func TestDynamicHeight_CursorPositionAfterShrink(t *testing.T) {
 	}
 
 	// Delete lines by backspacing
-	backspace := tea.KeyPressMsg{Code: tea.KeyBackspace}
+	backspace := tui.KeyPressMsg{Code: tui.KeyBackspace}
 	ta, _ = ta.Update(backspace) // delete 'f'
 	ta, _ = ta.Update(backspace) // merge line 5 into 4
 	ta, _ = ta.Update(backspace) // delete 'e'
@@ -2177,7 +2177,7 @@ func TestDynamicHeight_CursorPositionAfterShrink(t *testing.T) {
 func TestDynamicHeight_CursorPositionAfterPaste(t *testing.T) {
 	ta := newDynamicTextArea(1, 20)
 
-	paste := tea.PasteMsg{Content: "line1\nline2\nline3\nline4\nline5"}
+	paste := tui.PasteMsg{Content: "line1\nline2\nline3\nline4\nline5"}
 	ta, _ = ta.Update(paste)
 
 	// Cursor should be at the end of the last pasted line
@@ -2197,7 +2197,7 @@ func TestMaxContentHeight_ScrollsBeyondMaxHeight(t *testing.T) {
 	ta := newDynamicTextArea(1, 5)
 	ta.MaxContentHeight = 10
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	for range 8 {
 		ta, _ = ta.Update(keyPress('x'))
 		ta, _ = ta.Update(enter)
@@ -2221,7 +2221,7 @@ func TestMaxContentHeight_BlocksAtLimit(t *testing.T) {
 	ta.Focus()
 	ta, _ = ta.Update(nil)
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	for range 10 {
 		ta, _ = ta.Update(keyPress('x'))
 		ta, _ = ta.Update(enter)
@@ -2241,7 +2241,7 @@ func TestMaxContentHeight_BackwardCompat(t *testing.T) {
 	ta.Focus()
 	ta, _ = ta.Update(nil)
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	for range 15 {
 		ta, _ = ta.Update(keyPress('x'))
 		ta, _ = ta.Update(enter)
@@ -2262,7 +2262,7 @@ func TestMaxContentHeight_WithoutDynamicHeight(t *testing.T) {
 	ta.Focus()
 	ta, _ = ta.Update(nil)
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	for range 10 {
 		ta, _ = ta.Update(keyPress('x'))
 		ta, _ = ta.Update(enter)
@@ -2281,7 +2281,7 @@ func TestMaxContentHeight_CursorVisibleWhileScrolling(t *testing.T) {
 	ta := newDynamicTextArea(1, 5)
 	ta.MaxContentHeight = 10
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	for range 8 {
 		ta, _ = ta.Update(keyPress('x'))
 		ta, _ = ta.Update(enter)
@@ -2305,7 +2305,7 @@ func TestMaxContentHeight_PasteCapped(t *testing.T) {
 	ta.Focus()
 	ta, _ = ta.Update(nil)
 
-	paste := tea.PasteMsg{Content: "1\n2\n3\n4\n5\n6\n7\n8\n9\n10"}
+	paste := tui.PasteMsg{Content: "1\n2\n3\n4\n5\n6\n7\n8\n9\n10"}
 	ta, _ = ta.Update(paste)
 
 	if ta.totalVisualLines() > 5 {
@@ -2317,7 +2317,7 @@ func TestDynamicHeight_ShrinksWhenScrolledAndLinesDeleted(t *testing.T) {
 	ta := newDynamicTextArea(1, 5)
 	ta.MaxContentHeight = 10
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	// Type 8 lines so we exceed MaxHeight (5) and start scrolling
 	for range 7 {
 		ta, _ = ta.Update(keyPress('x'))
@@ -2333,7 +2333,7 @@ func TestDynamicHeight_ShrinksWhenScrolledAndLinesDeleted(t *testing.T) {
 	}
 
 	// Now delete lines from the bottom by selecting all on current line and backspacing
-	backspace := tea.KeyPressMsg{Code: tea.KeyBackspace}
+	backspace := tui.KeyPressMsg{Code: tui.KeyBackspace}
 	for ta.LineCount() > 4 {
 		ta.CursorEnd()
 		for len(ta.value[ta.row]) > 0 {
@@ -2356,7 +2356,7 @@ func TestDynamicHeight_ShrinksWhenScrolledNoMaxContent(t *testing.T) {
 	// DynamicHeight with MaxHeight but no MaxContentHeight
 	ta := newDynamicTextArea(1, 99)
 
-	enter := tea.KeyPressMsg{Code: tea.KeyEnter}
+	enter := tui.KeyPressMsg{Code: tui.KeyEnter}
 	// Type 8 lines
 	for range 7 {
 		ta, _ = ta.Update(keyPress('x'))
@@ -2373,7 +2373,7 @@ func TestDynamicHeight_ShrinksWhenScrolledNoMaxContent(t *testing.T) {
 	ta, _ = ta.Update(nil)
 
 	// Now delete lines from the bottom
-	backspace := tea.KeyPressMsg{Code: tea.KeyBackspace}
+	backspace := tui.KeyPressMsg{Code: tui.KeyBackspace}
 	for ta.LineCount() > 3 {
 		ta.CursorEnd()
 		for len(ta.value[ta.row]) > 0 {
@@ -2403,8 +2403,8 @@ func newTextArea() Model {
 	return textarea
 }
 
-func keyPress(key rune) tea.Msg {
-	return tea.KeyPressMsg{Code: key, Text: string(key)}
+func keyPress(key rune) tui.Msg {
+	return tui.KeyPressMsg{Code: key, Text: string(key)}
 }
 
 func sendString(m Model, str string) Model {

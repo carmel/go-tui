@@ -4,10 +4,10 @@ package table
 import (
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/help"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/viewport"
 	"github.com/charmbracelet/x/ansi"
 )
@@ -199,13 +199,13 @@ func WithKeyMap(km KeyMap) Option {
 }
 
 // Update is the Bubble Tea update loop.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
 	if !m.focus {
 		return m, nil
 	}
 
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.KeyMap.LineUp):
 			m.MoveUp(1)

@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 	"github.com/sahilm/fuzzy"
 
@@ -57,7 +57,7 @@ type ItemDelegate interface {
 	// loop will pass through here except when the user is setting a filter.
 	// Use this method to perform item-level updates appropriate to this
 	// delegate.
-	Update(msg tea.Msg, m *Model) tea.Cmd
+	Update(msg tui.Msg, m *Model) tui.Cmd
 }
 
 type filteredItem struct {
@@ -377,8 +377,8 @@ func (m Model) Items() []Item {
 }
 
 // SetItems sets the items available in the list. This returns a command.
-func (m *Model) SetItems(i []Item) tea.Cmd {
-	var cmd tea.Cmd
+func (m *Model) SetItems(i []Item) tui.Cmd {
+	var cmd tui.Cmd
 	m.items = i
 
 	if m.filterState != Unfiltered {
@@ -408,8 +408,8 @@ func (m *Model) ResetFilter() {
 }
 
 // SetItem replaces an item at the given index. This returns a command.
-func (m *Model) SetItem(index int, item Item) tea.Cmd {
-	var cmd tea.Cmd
+func (m *Model) SetItem(index int, item Item) tui.Cmd {
+	var cmd tui.Cmd
 	m.items[index] = item
 
 	if m.filterState != Unfiltered {
@@ -422,8 +422,8 @@ func (m *Model) SetItem(index int, item Item) tea.Cmd {
 
 // InsertItem inserts an item at the given index. If the index is out of the upper bound,
 // the item will be appended. This returns a command.
-func (m *Model) InsertItem(index int, item Item) tea.Cmd {
-	var cmd tea.Cmd
+func (m *Model) InsertItem(index int, item Item) tui.Cmd {
+	var cmd tui.Cmd
 	m.items = insertItemIntoSlice(m.items, item, index)
 
 	if m.filterState != Unfiltered {
@@ -637,7 +637,7 @@ func (m *Model) SetSpinner(spinner spinner.Spinner) {
 }
 
 // ToggleSpinner toggles the spinner. Note that this also returns a command.
-func (m *Model) ToggleSpinner() tea.Cmd {
+func (m *Model) ToggleSpinner() tui.Cmd {
 	if !m.showSpinner {
 		return m.StartSpinner()
 	}
@@ -646,7 +646,7 @@ func (m *Model) ToggleSpinner() tea.Cmd {
 }
 
 // StartSpinner starts the spinner. Note that this returns a command.
-func (m *Model) StartSpinner() tea.Cmd {
+func (m *Model) StartSpinner() tui.Cmd {
 	m.showSpinner = true
 	return m.spinner.Tick
 }
@@ -666,7 +666,7 @@ func (m *Model) DisableQuitKeybindings() {
 
 // NewStatusMessage sets a new status message, which will show for a limited
 // amount of time. Note that this also returns a command.
-func (m *Model) NewStatusMessage(s string) tea.Cmd {
+func (m *Model) NewStatusMessage(s string) tui.Cmd {
 	m.statusMessage = s
 	if m.statusMessageTimer != nil {
 		m.statusMessageTimer.Stop()
@@ -675,7 +675,7 @@ func (m *Model) NewStatusMessage(s string) tea.Cmd {
 	m.statusMessageTimer = time.NewTimer(m.StatusMessageLifetime)
 
 	// Wait for timeout
-	return func() tea.Msg {
+	return func() tui.Msg {
 		<-m.statusMessageTimer.C
 		return statusMessageTimeoutMsg{}
 	}
@@ -816,13 +816,13 @@ func (m *Model) hideStatusMessage() {
 }
 
 // Update is the Bubble Tea update loop.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
-	var cmds []tea.Cmd
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
+	var cmds []tui.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		if key.Matches(msg, m.KeyMap.ForceQuit) {
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 
 	case FilterMatchesMsg:
@@ -846,13 +846,13 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		cmds = append(cmds, m.handleBrowsing(msg))
 	}
 
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
 // Updates for when a user is browsing the list.
-func (m *Model) handleBrowsing(msg tea.Msg) tea.Cmd {
+func (m *Model) handleBrowsing(msg tui.Msg) tui.Cmd {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		// Note: we match clear filter before quit because, by default, they're
 		// both mapped to escape.
@@ -860,7 +860,7 @@ func (m *Model) handleBrowsing(msg tea.Msg) tea.Cmd {
 			m.resetFiltering()
 
 		case key.Matches(msg, m.KeyMap.Quit):
-			return tea.Quit
+			return tui.Quit
 
 		case key.Matches(msg, m.KeyMap.CursorUp):
 			m.CursorUp()
@@ -908,11 +908,11 @@ func (m *Model) handleBrowsing(msg tea.Msg) tea.Cmd {
 }
 
 // Updates for when a user is in the filter editing interface.
-func (m *Model) handleFiltering(msg tea.Msg) tea.Cmd {
-	var cmds []tea.Cmd
+func (m *Model) handleFiltering(msg tui.Msg) tui.Cmd {
+	var cmds []tui.Cmd
 
 	// Handle keys
-	if msg, ok := msg.(tea.KeyPressMsg); ok {
+	if msg, ok := msg.(tui.KeyPressMsg); ok {
 		switch {
 		case key.Matches(msg, m.KeyMap.CancelWhileFiltering):
 			m.resetFiltering()
@@ -959,7 +959,7 @@ func (m *Model) handleFiltering(msg tea.Msg) tea.Cmd {
 	// Update pagination
 	m.updatePagination()
 
-	return tea.Batch(cmds...)
+	return tui.Batch(cmds...)
 }
 
 // ShortHelp returns bindings to show in the abbreviated help view. It's part
@@ -1248,8 +1248,8 @@ func (m Model) spinnerView() string {
 	return m.spinner.View()
 }
 
-func filterItems(m Model) tea.Cmd {
-	return func() tea.Msg {
+func filterItems(m Model) tui.Cmd {
+	return func() tui.Msg {
 		if m.FilterInput.Value() == "" || m.filterState == Unfiltered {
 			return FilterMatchesMsg(m.itemsAsFilterItems()) // return nothing
 		}

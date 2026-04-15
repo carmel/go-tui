@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 const (
@@ -44,7 +44,7 @@ type model struct {
 type tickMsg time.Time
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error running program: %v\n", err)
 	}
@@ -72,25 +72,25 @@ func (m *model) updateEyePositions() {
 	m.eyePositions[1] = startX + eyeSpacing
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return tickCmd()
 }
 
-func tickCmd() tea.Cmd {
-	return tea.Tick(50*time.Millisecond, func(t time.Time) tea.Msg {
+func tickCmd() tui.Cmd {
+	return tui.Tick(50*time.Millisecond, func(t time.Time) tui.Msg {
 		return tickMsg(t)
 	})
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tui.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 		m.updateEyePositions()
@@ -122,8 +122,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tickCmd()
 }
 
-func (m model) View() tea.View {
-	var v tea.View
+func (m model) View() tui.View {
+	var v tui.View
 	v.AltScreen = true // Use alternate screen buffer
 
 	// Create empty canvas

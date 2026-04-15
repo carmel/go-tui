@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/cursor"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textinput"
 )
 
@@ -70,17 +70,17 @@ func initialModel() model {
 	return m
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return textinput.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 
 		// Change cursor mode
 		case "ctrl+r":
@@ -88,13 +88,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.cursorMode > cursor.CursorHide {
 				m.cursorMode = cursor.CursorBlink
 			}
-			cmds := make([]tea.Cmd, len(m.inputs))
+			cmds := make([]tui.Cmd, len(m.inputs))
 			for i := range m.inputs {
 				s := m.inputs[i].Styles()
 				s.Cursor.Blink = m.cursorMode == cursor.CursorBlink
 				m.inputs[i].SetStyles(s)
 			}
-			return m, tea.Batch(cmds...)
+			return m, tui.Batch(cmds...)
 
 		// Set focus to next input
 		case "tab", "shift+tab", "enter", "up", "down":
@@ -103,7 +103,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			// Did the user press enter while the submit button was focused?
 			// If so, exit.
 			if s == "enter" && m.focusIndex == len(m.inputs) {
-				return m, tea.Quit
+				return m, tui.Quit
 			}
 
 			// Cycle indexes
@@ -119,7 +119,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focusIndex = len(m.inputs)
 			}
 
-			cmds := make([]tea.Cmd, len(m.inputs))
+			cmds := make([]tui.Cmd, len(m.inputs))
 			for i := 0; i <= len(m.inputs)-1; i++ {
 				if i == m.focusIndex {
 					// Set focused state
@@ -130,7 +130,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.inputs[i].Blur()
 			}
 
-			return m, tea.Batch(cmds...)
+			return m, tui.Batch(cmds...)
 		}
 	}
 
@@ -140,8 +140,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
-	cmds := make([]tea.Cmd, len(m.inputs))
+func (m *model) updateInputs(msg tui.Msg) tui.Cmd {
+	cmds := make([]tui.Cmd, len(m.inputs))
 
 	// Only text inputs with Focus() set will respond, so it's safe to simply
 	// update all of them here without any further logic.
@@ -149,12 +149,12 @@ func (m *model) updateInputs(msg tea.Msg) tea.Cmd {
 		m.inputs[i], cmds[i] = m.inputs[i].Update(msg)
 	}
 
-	return tea.Batch(cmds...)
+	return tui.Batch(cmds...)
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	var b strings.Builder
-	var c *tea.Cursor
+	var c *tui.Cursor
 
 	for i, in := range m.inputs {
 		b.WriteString(m.inputs[i].View())
@@ -183,13 +183,13 @@ func (m model) View() tea.View {
 		b.WriteRune('\n')
 	}
 
-	v := tea.NewView(b.String())
+	v := tui.NewView(b.String())
 	v.Cursor = c
 	return v
 }
 
 func main() {
-	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
+	if _, err := tui.NewProgram(initialModel()).Run(); err != nil {
 		fmt.Printf("could not start program: %s\n", err)
 		os.Exit(1)
 	}

@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/spinner"
 )
 
@@ -21,8 +21,8 @@ type responseMsg struct{}
 // In this case, we'll send events on the channel at a random interval between
 // 100 to 1000 milliseconds. As a command, Bubble Tea will run this
 // asynchronously.
-func listenForActivity(sub chan struct{}) tea.Cmd {
-	return func() tea.Msg {
+func listenForActivity(sub chan struct{}) tui.Cmd {
+	return func() tui.Msg {
 		for {
 			time.Sleep(time.Millisecond * time.Duration(rand.Int63n(900)+100)) // nolint:gosec
 			sub <- struct{}{}
@@ -31,8 +31,8 @@ func listenForActivity(sub chan struct{}) tea.Cmd {
 }
 
 // A command that waits for the activity on a channel.
-func waitForActivity(sub chan struct{}) tea.Cmd {
-	return func() tea.Msg {
+func waitForActivity(sub chan struct{}) tui.Cmd {
+	return func() tui.Msg {
 		return responseMsg(<-sub)
 	}
 }
@@ -44,24 +44,24 @@ type model struct {
 	quitting  bool
 }
 
-func (m model) Init() tea.Cmd {
-	return tea.Batch(
+func (m model) Init() tui.Cmd {
+	return tui.Batch(
 		m.spinner.Tick,
 		listenForActivity(m.sub), // generate activity
 		waitForActivity(m.sub),   // wait for activity
 	)
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		m.quitting = true
-		return m, tea.Quit
+		return m, tui.Quit
 	case responseMsg:
 		m.responses++                    // record external activity
 		return m, waitForActivity(m.sub) // wait for next event
 	case spinner.TickMsg:
-		var cmd tea.Cmd
+		var cmd tui.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
 	default:
@@ -69,16 +69,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	s := fmt.Sprintf("\n %s Events received: %d\n\n Press any key to exit\n", m.spinner.View(), m.responses)
 	if m.quitting {
 		s += "\n"
 	}
-	return tea.NewView(s)
+	return tui.NewView(s)
 }
 
 func main() {
-	p := tea.NewProgram(model{
+	p := tui.NewProgram(model{
 		sub:     make(chan struct{}),
 		spinner: spinner.New(),
 	})

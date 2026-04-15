@@ -5,11 +5,11 @@ package main
 import (
 	"log"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 func main() {
-	p := tea.NewProgram(model{})
+	p := tui.NewProgram(model{})
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -17,25 +17,25 @@ func main() {
 
 type model struct{}
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		if s := msg.String(); s == "ctrl+c" || s == "q" || s == "esc" {
-			return m, tea.Quit
+			return m, tui.Quit
 		}
-		return m, tea.RequestWindowSize
+		return m, tui.RequestWindowSize
 
-	case tea.WindowSizeMsg:
-		return m, tea.Printf("The window size is: %dx%d", msg.Width, msg.Height)
+	case tui.WindowSizeMsg:
+		return m, tui.Printf("The window size is: %dx%d", msg.Width, msg.Height)
 	}
 
 	return m, nil
 }
 
-func (m model) View() tea.View {
-	return tea.NewView("\nWhen you're done press q to quit.\nPress any other key to query the window-size.\n")
+func (m model) View() tui.View {
+	return tui.NewView("\nWhen you're done press q to quit.\nPress any other key to query the window-size.\n")
 }

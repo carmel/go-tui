@@ -15,7 +15,7 @@ import (
 	"os"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 const debounceDuration = time.Second
@@ -26,16 +26,16 @@ type model struct {
 	tag int
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		// Increment the tag on the model...
 		m.tag++
-		return m, tea.Tick(debounceDuration, func(_ time.Time) tea.Msg {
+		return m, tui.Tick(debounceDuration, func(_ time.Time) tui.Msg {
 			// ...and include a copy of that tag value in the message.
 			return exitMsg(m.tag)
 		})
@@ -46,20 +46,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Otherwise, the debounce timeout has passed and this message is a
 		// valid debounced one.
 		if int(msg) == m.tag {
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 
 	return m, nil
 }
 
-func (m model) View() tea.View {
-	return tea.NewView(fmt.Sprintf("Key presses: %d", m.tag) +
+func (m model) View() tui.View {
+	return tui.NewView(fmt.Sprintf("Key presses: %d", m.tag) +
 		"\nTo exit press any key, then wait for one second without pressing anything.")
 }
 
 func main() {
-	if _, err := tea.NewProgram(model{}).Run(); err != nil {
+	if _, err := tui.NewProgram(model{}).Run(); err != nil {
 		fmt.Println("uh oh:", err)
 		os.Exit(1)
 	}

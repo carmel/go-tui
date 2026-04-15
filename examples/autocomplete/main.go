@@ -6,15 +6,15 @@ import (
 	"log"
 	"net/http"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/help"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textinput"
 )
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -31,7 +31,7 @@ type repo struct {
 
 const reposURL = "https://api.github.com/orgs/charmbracelet/repos"
 
-func getRepos() tea.Msg {
+func getRepos() tui.Msg {
 	req, err := http.NewRequest(http.MethodGet, reposURL, nil)
 	if err != nil {
 		return gotReposErrMsg(err)
@@ -115,11 +115,11 @@ func initialModel() model {
 	}
 }
 
-func (m model) Init() tea.Cmd {
-	return tea.Batch(getRepos, textinput.Blink)
+func (m model) Init() tui.Cmd {
+	return tui.Batch(getRepos, textinput.Blink)
 }
 
-func (m model) Cursor() *tea.Cursor {
+func (m model) Cursor() *tui.Cursor {
 	c := m.textInput.Cursor()
 	if c != nil {
 		c.Y += lipgloss.Height(m.headerView())
@@ -127,7 +127,7 @@ func (m model) Cursor() *tea.Cursor {
 	return c
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
 
 	case gotReposSuccessMsg:
@@ -137,14 +137,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.textInput.SetSuggestions(suggestions)
 
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.keymap.quit):
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 
-	var cmd tea.Cmd
+	var cmd tui.Cmd
 	m.textInput, cmd = m.textInput.Update(msg)
 
 	// Determine whether to show completion keybindings.
@@ -158,12 +158,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if len(m.textInput.AvailableSuggestions()) < 1 {
-		return tea.NewView("One sec, we're fetching completions...")
+		return tui.NewView("One sec, we're fetching completions...")
 	}
 
-	v := tea.NewView(lipgloss.JoinVertical(
+	v := tui.NewView(lipgloss.JoinVertical(
 		lipgloss.Left,
 		m.headerView(),
 		m.textInput.View(),

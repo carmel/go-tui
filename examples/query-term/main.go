@@ -11,7 +11,7 @@ import (
 	"strings"
 	"unicode"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/textinput"
 )
 
@@ -29,19 +29,19 @@ type model struct {
 	err   error
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmds []tui.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		m.err = nil
 		switch msg.String() {
 		case "ctrl+c":
-			return m, tea.Quit
+			return m, tui.Quit
 		case "enter":
 			// Write the sequence to the terminal.
 			val := m.input.Value()
@@ -62,7 +62,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.input.SetValue("")
 
 			// Write the sequence to the terminal.
-			return m, func() tea.Msg {
+			return m, func() tui.Msg {
 				io.WriteString(os.Stdout, seq)
 				return nil
 			}
@@ -71,31 +71,31 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		_, typ, ok := strings.Cut(fmt.Sprintf("%T", msg), ".")
 		if ok && unicode.IsUpper(rune(typ[0])) {
 			// Only log messages that are exported types.
-			cmds = append(cmds, tea.Printf("Received message: %T %+v", msg, msg))
+			cmds = append(cmds, tui.Printf("Received message: %T %+v", msg, msg))
 		}
 	}
 
-	var cmd tea.Cmd
+	var cmd tui.Cmd
 	m.input, cmd = m.input.Update(msg)
 	cmds = append(cmds, cmd)
 
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	var s strings.Builder
 	s.WriteString(m.input.View())
 	if m.err != nil {
 		s.WriteString("\n\nError: " + m.err.Error())
 	}
 	s.WriteString("\n\nPress ctrl+c to quit, enter to write the sequence to terminal")
-	v := tea.NewView(s.String())
+	v := tui.NewView(s.String())
 	v.Cursor = m.input.Cursor()
 	return v
 }
 
 func main() {
-	p := tea.NewProgram(newModel())
+	p := tui.NewProgram(newModel())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}

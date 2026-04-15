@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/list"
 )
 
@@ -23,28 +23,28 @@ type model struct {
 	list list.Model
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		if msg.String() == "ctrl+c" {
-			return m, tea.Quit
+			return m, tui.Quit
 		}
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		h, v := docStyle.GetFrameSize()
 		m.list.SetSize(msg.Width-h, msg.Height-v)
 	}
 
-	var cmd tea.Cmd
+	var cmd tui.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
 
-func (m model) View() tea.View {
-	v := tea.NewView(docStyle.Render(m.list.View()))
+func (m model) View() tui.View {
+	v := tui.NewView(docStyle.Render(m.list.View()))
 	v.AltScreen = true
 	return v
 }
@@ -79,7 +79,7 @@ func main() {
 	m := model{list: list.New(items, list.NewDefaultDelegate(), 0, 0)}
 	m.list.Title = "My Fave Things"
 
-	p := tea.NewProgram(m)
+	p := tui.NewProgram(m)
 
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error running program:", err)

@@ -6,15 +6,15 @@ import (
 	"os"
 	"os/exec"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 type editorFinishedMsg struct{ err error }
 
-func openEditor() tea.Cmd {
+func openEditor() tui.Cmd {
 	editor := cmp.Or(os.Getenv("EDITOR"), "vim")
 	c := exec.Command(editor) //nolint:gosec
-	return tea.ExecProcess(c, func(err error) tea.Msg {
+	return tui.ExecProcess(c, func(err error) tui.Msg {
 		return editorFinishedMsg{err}
 	})
 }
@@ -24,13 +24,13 @@ type model struct {
 	err             error
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "a":
 			m.altscreenActive = !m.altscreenActive
@@ -38,31 +38,31 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "e":
 			return m, openEditor()
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	case editorFinishedMsg:
 		if msg.err != nil {
 			m.err = msg.err
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.err != nil {
-		v := tea.NewView("Error: " + m.err.Error() + "\n")
+		v := tui.NewView("Error: " + m.err.Error() + "\n")
 		v.AltScreen = m.altscreenActive
 		return v
 	}
-	v := tea.NewView("Press 'e' to open your EDITOR.\nPress 'a' to toggle the altscreen\nPress 'q' to quit.\n")
+	v := tui.NewView("Press 'e' to open your EDITOR.\nPress 'a' to toggle the altscreen\nPress 'q' to quit.\n")
 	v.AltScreen = m.altscreenActive
 	return v
 }
 
 func main() {
 	m := model{}
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tui.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

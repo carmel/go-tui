@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 var (
@@ -19,25 +19,25 @@ type model struct {
 	suspending bool
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.ResumeMsg:
+	case tui.ResumeMsg:
 		m.suspending = false
 		return m, nil
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "ctrl+c", "esc":
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		case "ctrl+z":
 			m.suspending = true
-			return m, tea.Suspend
+			return m, tui.Suspend
 		case "space":
-			var cmd tea.Cmd
+			var cmd tui.Cmd
 			m.altscreen = !m.altscreen
 			return m, cmd
 		}
@@ -45,15 +45,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.suspending {
-		v := tea.NewView("")
+		v := tui.NewView("")
 		v.AltScreen = m.altscreen
 		return v
 	}
 
 	if m.quitting {
-		v := tea.NewView("Bye!\n")
+		v := tui.NewView("Bye!\n")
 		v.AltScreen = m.altscreen
 		return v
 	}
@@ -70,14 +70,14 @@ func (m model) View() tea.View {
 		mode = inlineMode
 	}
 
-	v := tea.NewView(fmt.Sprintf("\n\n  You're in %s\n\n\n", keywordStyle.Render(mode)) +
+	v := tui.NewView(fmt.Sprintf("\n\n  You're in %s\n\n\n", keywordStyle.Render(mode)) +
 		helpStyle.Render("  space: switch modes • ctrl-z: suspend • q: exit\n"))
 	v.AltScreen = m.altscreen
 	return v
 }
 
 func main() {
-	if _, err := tea.NewProgram(model{}).Run(); err != nil {
+	if _, err := tui.NewProgram(model{}).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

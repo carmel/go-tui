@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/list"
 )
 
@@ -43,7 +43,7 @@ type itemDelegate struct {
 
 func (d itemDelegate) Height() int                             { return 1 }
 func (d itemDelegate) Spacing() int                            { return 0 }
-func (d itemDelegate) Update(_ tea.Msg, _ *list.Model) tea.Cmd { return nil }
+func (d itemDelegate) Update(_ tui.Msg, _ *list.Model) tui.Cmd { return nil }
 func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list.Item) {
 	i, ok := listItem.(item)
 	if !ok {
@@ -103,48 +103,48 @@ func (m *model) updateStyles(isDark bool) {
 	m.list.SetDelegate(itemDelegate{styles: &m.styles})
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
 		return m, nil
 
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch keypress := msg.String(); keypress {
 		case "q", "ctrl+c":
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 
 		case "enter":
 			i, ok := m.list.SelectedItem().(item)
 			if ok {
 				m.choice = string(i)
 			}
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 
-	var cmd tea.Cmd
+	var cmd tui.Cmd
 	m.list, cmd = m.list.Update(msg)
 	return m, cmd
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.choice != "" {
-		return tea.NewView(m.styles.quitText.Render(fmt.Sprintf("%s? Sounds good to me.", m.choice)))
+		return tui.NewView(m.styles.quitText.Render(fmt.Sprintf("%s? Sounds good to me.", m.choice)))
 	}
 	if m.quitting {
-		return tea.NewView(m.styles.quitText.Render("Not hungry? That’s cool."))
+		return tui.NewView(m.styles.quitText.Render("Not hungry? That’s cool."))
 	}
-	return tea.NewView("\n" + m.list.View())
+	return tui.NewView("\n" + m.list.View())
 }
 
 func main() {
-	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
+	if _, err := tui.NewProgram(initialModel()).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

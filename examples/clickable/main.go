@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/segmentio/ksuid"
 )
 
@@ -15,7 +15,7 @@ import (
 // string that is unique to the layer.
 type LayerHitMsg struct {
 	ID    string
-	Mouse tea.MouseMsg
+	Mouse tui.MouseMsg
 }
 
 const maxDialogs = 999
@@ -69,36 +69,36 @@ type model struct {
 	dragOffsetY      int
 }
 
-func (m model) Init() tea.Cmd {
-	return tea.Batch(
-		tea.RequestBackgroundColor,
+func (m model) Init() tui.Cmd {
+	return tui.Batch(
+		tui.RequestBackgroundColor,
 	)
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
 
-	case tea.BackgroundColorMsg:
+	case tui.BackgroundColorMsg:
 		if msg.IsDark() {
 			m.specialWordStyle = m.specialWordStyle.Foreground(specialWordDarkColor)
 		} else {
 			m.specialWordStyle = m.specialWordStyle.Foreground(specialWordLightColor)
 		}
 
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "ctrl+c", "esc":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 
 	case LayerHitMsg:
 		mouse := msg.Mouse.Mouse()
 
 		switch msg.Mouse.(type) {
-		case tea.MouseClickMsg:
-			if mouse.Button != tea.MouseLeft {
+		case tui.MouseClickMsg:
+			if mouse.Button != tui.MouseLeft {
 				break
 			}
 
@@ -136,7 +136,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// MouseMotion events are send when the mouse has moved and a mouse
 		// button is not pressed.
-		case tea.MouseMotionMsg:
+		case tui.MouseMotionMsg:
 			// Dragging
 			if m.mouseDown && m.dragID != "" {
 				// Find the dialog box we're dragging
@@ -174,7 +174,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 
-		case tea.MouseReleaseMsg:
+		case tui.MouseReleaseMsg:
 
 			// Make sure we're releasing on something with an ID. A successful
 			// click is a press and release.
@@ -207,8 +207,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
-	var v tea.View
+func (m model) View() tui.View {
+	var v tui.View
 	var body string
 
 	n := len(m.dialogs)
@@ -238,10 +238,10 @@ func (m model) View() tea.View {
 
 	comp := lipgloss.NewCompositor(root)
 
-	v.MouseMode = tea.MouseModeAllMotion
+	v.MouseMode = tui.MouseModeAllMotion
 	v.AltScreen = true
-	v.OnMouse = func(msg tea.MouseMsg) tea.Cmd {
-		return func() tea.Msg {
+	v.OnMouse = func(msg tui.MouseMsg) tui.Cmd {
+		return func() tui.Msg {
 			mouse := msg.Mouse()
 			x, y := mouse.X, mouse.Y
 			if id := comp.Hit(x, y).ID(); id != "" {
@@ -344,7 +344,7 @@ func main() {
 
 	path := os.Getenv("TEA_LOGFILE")
 	if path != "" {
-		f, err := tea.LogToFile(path, "layers")
+		f, err := tui.LogToFile(path, "layers")
 		if err != nil {
 			fmt.Println("could not open logfile:", err)
 			os.Exit(1)
@@ -352,7 +352,7 @@ func main() {
 		defer f.Close()
 	}
 
-	if _, err := tea.NewProgram(model{}).Run(); err != nil {
+	if _, err := tui.NewProgram(model{}).Run(); err != nil {
 		fmt.Println("Error while running program:", err)
 		os.Exit(1)
 	}

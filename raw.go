@@ -15,7 +15,7 @@ type RawMsg struct {
 //
 // Example:
 //
-//	func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+//	func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 //	  switch msg := msg.(type) {
 //	  case input.PrimaryDeviceAttributesEvent:
 //	    for _, attr := range msg {
@@ -28,7 +28,7 @@ type RawMsg struct {
 //
 //	  // Request the terminal primary device attributes to detect Sixel graphics
 //	  // support.
-//	  return m, tea.Raw(ansi.RequestPrimaryDeviceAttributes)
+//	  return m, tui.Raw(ansi.RequestPrimaryDeviceAttributes)
 //	}
 func Raw(r any) Cmd {
 	return func() Msg {

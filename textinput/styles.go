@@ -4,8 +4,8 @@ import (
 	"image/color"
 	"time"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 // DefaultStyles returns the default styles for focused and blurred states for
@@ -28,7 +28,7 @@ func DefaultStyles(isDark bool) Styles {
 	}
 	s.Cursor = CursorStyle{
 		Color: lipgloss.Color("7"),
-		Shape: tea.CursorBlock,
+		Shape: tui.CursorBlock,
 		Blink: true,
 	}
 	return s
@@ -77,12 +77,12 @@ type CursorStyle struct {
 
 	// Shape is the cursor shape. The following shapes are available:
 	//
-	// - tea.CursorBlock
-	// - tea.CursorUnderline
-	// - tea.CursorBar
+	// - tui.CursorBlock
+	// - tui.CursorUnderline
+	// - tui.CursorBar
 	//
 	// This is only used for real cursors.
-	Shape tea.CursorShape
+	Shape tui.CursorShape
 
 	// CursorBlink determines whether or not the cursor should blink.
 	Blink bool

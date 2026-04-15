@@ -18,7 +18,7 @@ type execMsg struct {
 //
 // Most of the time you'll want to use ExecProcess, which runs an exec.Cmd.
 //
-// For non-interactive i/o you should use a Cmd (that is, a tea.Cmd).
+// For non-interactive i/o you should use a Cmd (that is, a tui.Cmd).
 func Exec(c ExecCommand, fn ExecCallback) Cmd {
 	return func() Msg {
 		return execMsg{cmd: c, fn: fn}
@@ -46,7 +46,7 @@ func Exec(c ExecCommand, fn ExecCallback) Cmd {
 //
 //	cmd := ExecProcess(exec.Command("vim", "file.txt"), nil)
 //
-// For non-interactive i/o you should use a Cmd (that is, a tea.Cmd).
+// For non-interactive i/o you should use a Cmd (that is, a tui.Cmd).
 func ExecProcess(c *exec.Cmd, fn ExecCallback) Cmd {
 	return Exec(wrapExecCommand(c), fn)
 }

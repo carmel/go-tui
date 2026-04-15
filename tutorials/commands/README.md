@@ -26,7 +26,7 @@ import (
     "os"
     "time"
 
-    tea "github.com/carmel/go-tui"
+    "github.com/carmel/go-tui"
 )
 
 const url = "https://charm.sh/"
@@ -55,7 +55,7 @@ Anyway, let’s write a `Cmd` that makes a request to a server and returns the
 result as a `Msg`.
 
 ```go
-func checkServer() tea.Msg {
+func checkServer() tui.Msg {
 
     // Create an HTTP client and make a GET request.
     c := &http.Client{Timeout: 10 * time.Second}
@@ -91,7 +91,7 @@ Note that we don’t call the function; the Bubble Tea runtime will do that when
 the time is right.
 
 ```go
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
     return checkServer
 }
 ```
@@ -104,7 +104,7 @@ types we made earlier when we were making the `checkServer` command? We handle
 them here. This makes dealing with many asynchronous operations very easy.
 
 ```go
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
     switch msg := msg.(type) {
 
     case statusMsg:
@@ -113,20 +113,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         // else to do. We'll still be able to render a final view with our
         // status message.
         m.status = int(msg)
-        return m, tea.Quit
+        return m, tui.Quit
 
     case errMsg:
         // There was an error. Note it in the model. And tell the runtime
         // we're done and want to quit.
         m.err = msg
-        return m, tea.Quit
+        return m, tui.Quit
 
-    case tea.KeyPressMsg:
+    case tui.KeyPressMsg:
         // Ctrl+c exits. Even with short running programs it's good to have
         // a quit key, just in case your logic is off. Users will be very
         // annoyed if they can't exit.
-		if msg.Mod == tea.ModCtrl && msg.Code == 'c' {
-			return m, tea.Quit
+		if msg.Mod == tui.ModCtrl && msg.Code == 'c' {
+			return m, tui.Quit
 		}
     }
 
@@ -138,13 +138,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 ## The View Function
 
 Our view is very straightforward. We look at the current model and build a
-`tea.View` accordingly:
+`tui.View` accordingly:
 
 ```go
-func (m model) View() tea.View {
+func (m model) View() tui.View {
     // If there's an error, print it out and don't do anything else.
     if m.err != nil {
-        return tea.NewView(fmt.Sprintf("\nWe had some trouble: %v\n\n", m.err))
+        return tui.NewView(fmt.Sprintf("\nWe had some trouble: %v\n\n", m.err))
     }
 
     // Tell the user we're doing something.
@@ -156,7 +156,7 @@ func (m model) View() tea.View {
     }
 
     // Send off whatever we came up with above for rendering.
-    return tea.NewView("\n" + s + "\n\n")
+    return tui.NewView("\n" + s + "\n\n")
 }
 ```
 
@@ -168,7 +168,7 @@ a `model` struct with default values.
 
 ```go
 func main() {
-    if _, err := tea.NewProgram(model{}).Run(); err != nil {
+    if _, err := tui.NewProgram(model{}).Run(); err != nil {
         fmt.Printf("Uh oh, there was an error: %v\n", err)
         os.Exit(1)
     }
@@ -186,8 +186,8 @@ any type. If you need to pass arguments to a command, you just make a function
 that returns a command. For example:
 
 ```go
-func cmdWithArg(id int) tea.Cmd {
-    return func() tea.Msg {
+func cmdWithArg(id int) tui.Cmd {
+    return func() tui.Msg {
         return someMsg{id: id}
     }
 }
@@ -196,8 +196,8 @@ func cmdWithArg(id int) tea.Cmd {
 A more real-world example looks like:
 
 ```go
-func checkSomeUrl(url string) tea.Cmd {
-    return func() tea.Msg {
+func checkSomeUrl(url string) tui.Cmd {
+    return func() tui.Msg {
         c := &http.Client{Timeout: 10 * time.Second}
         res, err := c.Get(url)
         if err != nil {
@@ -216,7 +216,7 @@ function, because that’s the one that runs asynchronously.
 After doing this tutorial and [the previous one][basics] you should be ready to
 build a Bubble Tea program of your own. We also recommend that you look at the
 Bubble Tea [example programs][examples] as well as [Bubbles][bubbles],
-a component library for Bubble Tea.
+a component library for Bubble tui.
 
 And, of course, check out the [Go Docs][docs].
 

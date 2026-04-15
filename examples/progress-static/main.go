@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/progress"
 )
 
@@ -41,7 +41,7 @@ var (
 func main() {
 	prog := progress.New(progress.WithScaled(true), progress.WithColors(pink, yellow))
 
-	if _, err := tea.NewProgram(model{progress: prog}).Run(); err != nil {
+	if _, err := tui.NewProgram(model{progress: prog}).Run(); err != nil {
 		fmt.Println("Oh no!", err)
 		os.Exit(1)
 	}
@@ -54,16 +54,16 @@ type model struct {
 	progress progress.Model
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return tickCmd()
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
-		return m, tea.Quit
+	case tui.KeyPressMsg:
+		return m, tui.Quit
 
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.progress.SetWidth(msg.Width - padding*2 - 4)
 		if m.progress.Width() > maxWidth {
 			m.progress.SetWidth(maxWidth)
@@ -74,7 +74,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.percent += 0.25
 		if m.percent > 1.0 {
 			m.percent = 1.0
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 		return m, tickCmd()
 
@@ -83,15 +83,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	pad := strings.Repeat(" ", padding)
-	return tea.NewView("\n" +
+	return tui.NewView("\n" +
 		pad + m.progress.ViewAs(m.percent) + "\n\n" +
 		pad + helpStyle("Press any key to quit"))
 }
 
-func tickCmd() tea.Cmd {
-	return tea.Tick(time.Second, func(t time.Time) tea.Msg {
+func tickCmd() tui.Cmd {
+	return tui.Tick(time.Second, func(t time.Time) tui.Msg {
 		return tickMsg(t)
 	})
 }

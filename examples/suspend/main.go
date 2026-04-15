@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 type model struct {
@@ -13,43 +13,43 @@ type model struct {
 	suspending bool
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.ResumeMsg:
+	case tui.ResumeMsg:
 		m.suspending = false
 		return m, nil
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "q", "esc":
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		case "ctrl+c":
 			m.quitting = true
-			return m, tea.Interrupt
+			return m, tui.Interrupt
 		case "ctrl+z":
 			m.suspending = true
-			return m, tea.Suspend
+			return m, tui.Suspend
 		}
 	}
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.suspending || m.quitting {
-		return tea.NewView("")
+		return tui.NewView("")
 	}
 
-	return tea.NewView("\nPress ctrl-z to suspend, ctrl+c to interrupt, q, or esc to exit\n")
+	return tui.NewView("\nPress ctrl-z to suspend, ctrl+c to interrupt, q, or esc to exit\n")
 }
 
 func main() {
-	if _, err := tea.NewProgram(model{}).Run(); err != nil {
+	if _, err := tui.NewProgram(model{}).Run(); err != nil {
 		fmt.Println("Error running program:", err)
-		if errors.Is(err, tea.ErrInterrupted) {
+		if errors.Is(err, tui.ErrInterrupted) {
 			os.Exit(130)
 		}
 		os.Exit(1)

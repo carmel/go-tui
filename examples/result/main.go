@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 var choices = []string{"Taro", "Coffee", "Lychee"}
@@ -18,21 +18,21 @@ type model struct {
 	choice string
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "q", "esc":
-			return m, tea.Quit
+			return m, tui.Quit
 
 		case "enter":
 			// Send the choice on the channel and exit.
 			m.choice = choices[m.cursor]
-			return m, tea.Quit
+			return m, tui.Quit
 
 		case "down", "j":
 			m.cursor++
@@ -51,7 +51,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	s := strings.Builder{}
 	s.WriteString("What kind of Bubble Tea would you like to order?\n\n")
 
@@ -66,20 +66,20 @@ func (m model) View() tea.View {
 	}
 	s.WriteString("\n(press q to quit)\n")
 
-	return tea.NewView(s.String())
+	return tui.NewView(s.String())
 }
 
 func main() {
-	p := tea.NewProgram(model{})
+	p := tui.NewProgram(model{})
 
-	// Run returns the model as a tea.Model.
+	// Run returns the model as a tui.Model.
 	m, err := p.Run()
 	if err != nil {
 		fmt.Println("Oh no:", err)
 		os.Exit(1)
 	}
 
-	// Assert the final tea.Model to our local model and print the choice.
+	// Assert the final tui.Model to our local model and print the choice.
 	if m, ok := m.(model); ok && m.choice != "" {
 		fmt.Printf("\n---\nYou chose %s!\n", m.choice)
 	}

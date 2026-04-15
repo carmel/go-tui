@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/progress"
 )
 
@@ -30,7 +30,7 @@ func main() {
 		progress: progress.New(progress.WithDefaultBlend()),
 	}
 
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tui.NewProgram(m).Run(); err != nil {
 		fmt.Println("Oh no!", err)
 		os.Exit(1)
 	}
@@ -42,16 +42,16 @@ type model struct {
 	progress progress.Model
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return tickCmd()
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
-		return m, tea.Quit
+	case tui.KeyPressMsg:
+		return m, tui.Quit
 
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.progress.SetWidth(msg.Width - padding*2 - 4)
 		if m.progress.Width() > maxWidth {
 			m.progress.SetWidth(maxWidth)
@@ -60,17 +60,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tickMsg:
 		if m.progress.Percent() == 1.0 {
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 
 		// Note that you can also use progress.Model.SetPercent to set the
 		// percentage value explicitly, too.
 		cmd := m.progress.IncrPercent(0.25)
-		return m, tea.Batch(tickCmd(), cmd)
+		return m, tui.Batch(tickCmd(), cmd)
 
 	// FrameMsg is sent when the progress bar wants to animate itself
 	case progress.FrameMsg:
-		var cmd tea.Cmd
+		var cmd tui.Cmd
 		m.progress, cmd = m.progress.Update(msg)
 		return m, cmd
 
@@ -79,15 +79,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	pad := strings.Repeat(" ", padding)
-	return tea.NewView("\n" +
+	return tui.NewView("\n" +
 		pad + m.progress.View() + "\n\n" +
 		pad + helpStyle("Press any key to quit"))
 }
 
-func tickCmd() tea.Cmd {
-	return tea.Tick(time.Second*1, func(t time.Time) tea.Msg {
+func tickCmd() tui.Cmd {
+	return tui.Tick(time.Second*1, func(t time.Time) tui.Msg {
 		return tickMsg(t)
 	})
 }

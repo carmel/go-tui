@@ -12,13 +12,13 @@ import (
 	"time"
 	"unicode"
 
-	"charm.land/lipgloss/v2"
 	"github.com/atotto/clipboard"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/cursor"
 	"github.com/carmel/go-tui/internal/memoization"
 	"github.com/carmel/go-tui/internal/runeutil"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/viewport"
 	"github.com/charmbracelet/x/ansi"
 	rw "github.com/mattn/go-runewidth"
@@ -154,12 +154,12 @@ type CursorStyle struct {
 
 	// Shape is the cursor shape. The following shapes are available:
 	//
-	// - tea.CursorBlock
-	// - tea.CursorUnderline
-	// - tea.CursorBar
+	// - tui.CursorBlock
+	// - tui.CursorUnderline
+	// - tui.CursorBar
 	//
 	// This is only used for real cursors.
-	Shape tea.CursorShape
+	Shape tui.CursorShape
 
 	// CursorBlink determines whether or not the cursor should blink.
 	Blink bool
@@ -417,7 +417,7 @@ func DefaultStyles(isDark bool) Styles {
 	}
 	s.Cursor = CursorStyle{
 		Color: lipgloss.Color("7"),
-		Shape: tea.CursorBlock,
+		Shape: tui.CursorBlock,
 		Blink: true,
 	}
 	return s
@@ -753,7 +753,7 @@ func (m Model) activeStyle() *StyleState {
 
 // Focus sets the focus state on the model. When the model is in focus it can
 // receive keyboard input and the cursor will be hidden.
-func (m *Model) Focus() tea.Cmd {
+func (m *Model) Focus() tui.Cmd {
 	m.focus = true
 	return m.virtualCursor.Focus()
 }
@@ -1200,7 +1200,7 @@ func (m *Model) SetHeight(h int) {
 }
 
 // Update is the Bubble Tea update loop.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
 	if !m.focus {
 		m.virtualCursor.Blur()
 		return m, nil
@@ -1209,7 +1209,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	// Used to determine if the cursor should blink.
 	oldRow, oldCol := m.cursorLineNumber(), m.col
 
-	var cmds []tea.Cmd
+	var cmds []tui.Cmd
 
 	if m.value[m.row] == nil {
 		m.value[m.row] = make([]rune, 0)
@@ -1220,9 +1220,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
-	case tea.PasteMsg:
+	case tui.PasteMsg:
 		m.insertRunesFromUserInput([]rune(msg.Content))
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.KeyMap.DeleteAfterCursor):
 			m.col = clamp(m.col, 0, len(m.value[m.row]))
@@ -1347,7 +1347,7 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 
 	m.repositionView()
 
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
 func (m *Model) view() string {
@@ -1594,11 +1594,11 @@ func (m Model) placeholderView() string {
 }
 
 // Blink returns the blink command for the virtual cursor.
-func Blink() tea.Msg {
+func Blink() tui.Msg {
 	return cursor.Blink()
 }
 
-// Cursor returns a [tea.Cursor] for rendering a real cursor in a Bubble Tea
+// Cursor returns a [tui.Cursor] for rendering a real cursor in a Bubble Tea
 // program. This requires that [Model.VirtualCursor] is set to false.
 //
 // Note that you will almost certainly also need to adjust the offset cursor
@@ -1607,11 +1607,11 @@ func Blink() tea.Msg {
 // Example:
 //
 //	// In your top-level View function:
-//	f := tea.NewFrame(m.textarea.View())
+//	f := tui.NewFrame(m.textarea.View())
 //	f.Cursor = m.textarea.Cursor()
 //	f.Cursor.Position.X += offsetX
 //	f.Cursor.Position.Y += offsetY
-func (m Model) Cursor() *tea.Cursor {
+func (m Model) Cursor() *tui.Cursor {
 	if m.useVirtualCursor || !m.Focused() {
 		return nil
 	}
@@ -1633,7 +1633,7 @@ func (m Model) Cursor() *tea.Cursor {
 		baseStyle.GetPaddingTop() +
 		baseStyle.GetBorderTopSize()
 
-	c := tea.NewCursor(xOffset, yOffset)
+	c := tui.NewCursor(xOffset, yOffset)
 	c.Blink = m.styles.Cursor.Blink
 	c.Color = m.styles.Cursor.Color
 	c.Shape = m.styles.Cursor.Shape
@@ -1794,7 +1794,7 @@ func (m *Model) splitLine(row, col int) {
 }
 
 // Paste is a command for pasting from the clipboard into the text input.
-func Paste() tea.Msg {
+func Paste() tui.Msg {
 	str, err := clipboard.ReadAll()
 	if err != nil {
 		return pasteErrMsg{err}

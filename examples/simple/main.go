@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 func main() {
@@ -16,13 +16,13 @@ func main() {
 	// Not required.
 	logfilePath := os.Getenv("BUBBLETEA_LOG")
 	if logfilePath != "" {
-		if _, err := tea.LogToFile(logfilePath, "simple"); err != nil {
+		if _, err := tui.LogToFile(logfilePath, "simple"); err != nil {
 			log.Fatal(err)
 		}
 	}
 
 	// Initialize our program
-	p := tea.NewProgram(model(5))
+	p := tui.NewProgram(model(5))
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -35,27 +35,27 @@ type model int
 
 // Init optionally returns an initial command we should run. In this case we
 // want to start the timer.
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return tick
 }
 
 // Update is called when messages are received. The idea is that you inspect the
 // message and send back an updated model accordingly. You can also return
 // a command, which is a function that performs I/O and returns a message.
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return m, tui.Quit
 		case "ctrl+z":
-			return m, tea.Suspend
+			return m, tui.Suspend
 		}
 
 	case tickMsg:
 		m--
 		if m <= 0 {
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 		return m, tick
 	}
@@ -64,15 +64,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View returns a string based on data in the model. That string which will be
 // rendered to the terminal.
-func (m model) View() tea.View {
-	return tea.NewView(fmt.Sprintf("Hi. This program will exit in %d seconds.\n\nTo quit sooner press ctrl-c, or press ctrl-z to suspend...\n", m))
+func (m model) View() tui.View {
+	return tui.NewView(fmt.Sprintf("Hi. This program will exit in %d seconds.\n\nTo quit sooner press ctrl-c, or press ctrl-z to suspend...\n", m))
 }
 
 // Messages are events that we respond to in our Update function. This
 // particular one indicates that the timer has ticked.
 type tickMsg time.Time
 
-func tick() tea.Msg {
+func tick() tui.Msg {
 	time.Sleep(time.Second)
 	return tickMsg{}
 }

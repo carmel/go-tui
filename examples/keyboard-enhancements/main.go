@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 type styles struct {
@@ -22,13 +22,13 @@ type model struct {
 	styles                 styles
 }
 
-func (m model) Init() tea.Cmd {
-	return tea.RequestBackgroundColor
+func (m model) Init() tui.Cmd {
+	return tui.RequestBackgroundColor
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	// Bubble Tea will send a [tea.KeyboardEnhancementsMsg] on startup if the
+	// Bubble Tea will send a [tui.KeyboardEnhancementsMsg] on startup if the
 	// terminal supports keyboard enhancements features.
 	//
 	// These features extend the capabilities of keyboard input beyond the basic legacy
@@ -40,33 +40,33 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	//
 	// This allows for more nuanced input handling in terminal applications.
 	// You can ask Bubble Tea to request additional keyboard enhancements
-	// features by setting fields on the [tea.View.KeyboardEnhancements] struct
-	// in your [tea.View] method.
-	case tea.KeyboardEnhancementsMsg:
+	// features by setting fields on the [tui.View.KeyboardEnhancements] struct
+	// in your [tui.View] method.
+	case tui.KeyboardEnhancementsMsg:
 		// Check which features were able to be enabled.
 		m.supportsDisambiguation = true // This is always enabled when this msg is received.
 		m.supportsEventTypes = msg.SupportsEventTypes()
 
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c":
-			return m, tea.Quit
+			return m, tui.Quit
 		default:
-			return m, tea.Println("  press: " + msg.String())
+			return m, tui.Println("  press: " + msg.String())
 		}
 
-	case tea.KeyReleaseMsg:
-		return m, tea.Printf("release: %s", msg.String())
+	case tui.KeyReleaseMsg:
+		return m, tui.Printf("release: %s", msg.String())
 
-	case tea.BackgroundColorMsg:
+	case tui.BackgroundColorMsg:
 		// Initialize styles.
 		m.updateStyles(msg.IsDark())
 	}
 	return m, nil
 }
 
-func (m model) View() tea.View {
-	var v tea.View
+func (m model) View() tui.View {
+	var v tui.View
 	var b strings.Builder
 	fmt.Fprintf(&b, "Terminal supports key releases: %v\n", m.supportsEventTypes)
 	fmt.Fprintf(&b, "Terminal supports key disambiguation: %v\n", m.supportsDisambiguation)
@@ -101,7 +101,7 @@ func initialModel() model {
 }
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Urgh: %v\n", err)
 		os.Exit(1)

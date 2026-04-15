@@ -9,8 +9,8 @@ import (
 	"regexp"
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/viewport"
 )
 
@@ -34,23 +34,23 @@ type model struct {
 	viewport viewport.Model
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	var (
-		cmd  tea.Cmd
-		cmds []tea.Cmd
+		cmd  tui.Cmd
+		cmds []tui.Cmd
 	)
 
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		if k := msg.String(); k == "ctrl+c" || k == "q" || k == "esc" {
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		headerHeight := lipgloss.Height(m.headerView())
 		footerHeight := lipgloss.Height(m.footerView())
 		verticalMarginHeight := headerHeight + footerHeight
@@ -88,13 +88,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.viewport, cmd = m.viewport.Update(msg)
 	cmds = append(cmds, cmd)
 
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
-func (m model) View() tea.View {
-	var v tea.View
+func (m model) View() tui.View {
+	var v tui.View
 	v.AltScreen = true                    // use the full size of the terminal in its "alternate screen buffer"
-	v.MouseMode = tea.MouseModeCellMotion // turn on mouse support so we can track the mouse wheel
+	v.MouseMode = tui.MouseModeCellMotion // turn on mouse support so we can track the mouse wheel
 	if !m.ready {
 		v.SetContent("\n  Initializing...")
 	} else {
@@ -123,7 +123,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	p := tea.NewProgram(
+	p := tui.NewProgram(
 		model{content: string(content)},
 	)
 

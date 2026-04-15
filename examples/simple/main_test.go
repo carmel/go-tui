@@ -7,7 +7,7 @@ func TestApp(t *testing.T) {
 	// keeps failing. This is because the output is colored and has escape
 	// sequences but the test runs against a buffer output and not a terminal,
 	// tty, or pty. One way to fix this is to pass a color profile to the test
-	// program using [tea.WithColorProfile(Ascii)].
+	// program using [tui.WithColorProfile(Ascii)].
 	t.Skip("this test is currently disabled")
 
 	m := model(10)
@@ -24,8 +24,8 @@ func TestApp(t *testing.T) {
 	time.Sleep(time.Second + time.Millisecond*200)
 	tm.Type("I'm typing things, but it'll be ignored by my program")
 	tm.Send("ignored msg")
-	tm.Send(tea.KeyPressMsg{
-		Code: tea.KeyEnter,
+	tm.Send(tui.KeyPressMsg{
+		Code: tui.KeyEnter,
 	})
 
 	if err := tm.Quit(); err != nil {
@@ -64,8 +64,8 @@ func TestAppInteractive(t *testing.T) {
 		return bytes.Contains(out, []byte("This program will exit in 7 seconds"))
 	}, teatest.WithDuration(5*time.Second))
 
-	tm.Send(tea.KeyPressMsg{
-		Code: tea.KeyEnter,
+	tm.Send(tui.KeyPressMsg{
+		Code: tui.KeyEnter,
 	})
 
 	if err := tm.Quit(); err != nil {

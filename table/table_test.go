@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/help"
 	"github.com/carmel/go-tui/viewport"
 	"github.com/charmbracelet/x/ansi"

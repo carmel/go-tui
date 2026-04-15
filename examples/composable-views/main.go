@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/spinner"
 	"github.com/carmel/go-tui/timer"
 )
@@ -73,19 +73,19 @@ func newModel(timeout time.Duration) mainModel {
 	return m
 }
 
-func (m mainModel) Init() tea.Cmd {
+func (m mainModel) Init() tui.Cmd {
 	// start the timer and spinner on program start
-	return tea.Batch(m.timer.Init(), m.spinner.Tick)
+	return tui.Batch(m.timer.Init(), m.spinner.Tick)
 }
 
-func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-	var cmds []tea.Cmd
+func (m mainModel) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmd tui.Cmd
+	var cmds []tui.Cmd
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return m, tui.Quit
 		case "tab":
 			if m.state == timerView {
 				m.state = spinnerView
@@ -118,10 +118,10 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.timer, cmd = m.timer.Update(msg)
 		cmds = append(cmds, cmd)
 	}
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
-func (m mainModel) View() tea.View {
+func (m mainModel) View() tui.View {
 	var s strings.Builder
 	model := m.currentFocusedModel()
 	if m.state == timerView {
@@ -130,7 +130,7 @@ func (m mainModel) View() tea.View {
 		s.WriteString(lipgloss.JoinHorizontal(lipgloss.Top, modelStyle.Render(fmt.Sprintf("%4s", m.timer.View())), focusedModelStyle.Render(m.spinner.View())))
 	}
 	s.WriteString(helpStyle.Render(fmt.Sprintf("\ntab: focus next • n: new %s • q: exit\n", model)))
-	return tea.NewView(s.String())
+	return tui.NewView(s.String())
 }
 
 func (m mainModel) currentFocusedModel() string {
@@ -155,7 +155,7 @@ func (m *mainModel) resetSpinner() {
 }
 
 func main() {
-	p := tea.NewProgram(newModel(defaultTime))
+	p := tui.NewProgram(newModel(defaultTime))
 
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)

@@ -54,7 +54,7 @@ func WithInput(input io.Reader) ProgramOption {
 //	var sess ssh.Session // ssh.Session is a type from the github.com/charmbracelet/ssh package
 //	pty, _, _ := sess.Pty()
 //	environ := append(sess.Environ(), "TERM="+pty.Term)
-//	p := tea.NewProgram(model, tea.WithEnvironment(environ)
+//	p := tui.NewProgram(model, tui.WithEnvironment(environ)
 func WithEnvironment(env []string) ProgramOption {
 	return func(p *Program) {
 		p.environ = env
@@ -102,7 +102,7 @@ func WithoutRenderer() ProgramOption {
 }
 
 // WithFilter supplies an event filter that will be invoked before Bubble Tea
-// processes a tea.Msg. The event filter can return any tea.Msg which will then
+// processes a tui.Msg. The event filter can return any tui.Msg which will then
 // get handled by Bubble Tea instead of the original event. If the event filter
 // returns nil, the event will be ignored and Bubble Tea will not process it.
 //
@@ -111,8 +111,8 @@ func WithoutRenderer() ProgramOption {
 //
 // Example:
 //
-//	func filter(m tea.Model, msg tea.Msg) tea.Msg {
-//		if _, ok := msg.(tea.QuitMsg); !ok {
+//	func filter(m tui.Model, msg tui.Msg) tui.Msg {
+//		if _, ok := msg.(tui.QuitMsg); !ok {
 //			return msg
 //		}
 //
@@ -124,7 +124,7 @@ func WithoutRenderer() ProgramOption {
 //		return msg
 //	}
 //
-//	p := tea.NewProgram(Model{}, tea.WithFilter(filter));
+//	p := tui.NewProgram(Model{}, tui.WithFilter(filter));
 //
 //	if _,err := p.Run(); err != nil {
 //		fmt.Println("Error running program:", err)
@@ -148,7 +148,7 @@ func WithFPS(fps int) ProgramOption {
 // WithColorProfile sets the color profile that the program will use. This is
 // useful when you want to force a specific color profile. By default, Bubble
 // Tea will try to detect the terminal's color profile from environment
-// variables and terminfo capabilities. Use [tea.WithEnvironment] to set custom
+// variables and terminfo capabilities. Use [tui.WithEnvironment] to set custom
 // environment variables.
 func WithColorProfile(profile colorprofile.Profile) ProgramOption {
 	return func(p *Program) {

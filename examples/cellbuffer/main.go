@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/charmbracelet/harmonica"
 )
 
@@ -128,8 +128,8 @@ func (c cellbuffer) String() string {
 
 type frameMsg struct{}
 
-func animate() tea.Cmd {
-	return tea.Tick(time.Second/fps, func(_ time.Time) tea.Msg {
+func animate() tui.Cmd {
+	return tui.Tick(time.Second/fps, func(_ time.Time) tui.Msg {
 		return frameMsg{}
 	})
 }
@@ -142,23 +142,23 @@ type model struct {
 	xVelocity, yVelocity float64
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return animate()
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
-		return m, tea.Quit
-	case tea.WindowSizeMsg:
+	case tui.KeyPressMsg:
+		return m, tui.Quit
+	case tui.WindowSizeMsg:
 		if !m.cells.ready() {
 			m.targetX, m.targetY = float64(msg.Width)/2, float64(msg.Height)/2
 		}
 		m.cells.init(msg.Width, msg.Height)
 		return m, nil
-	case tea.MouseMsg:
+	case tui.MouseMsg:
 		switch msg.(type) {
-		case tea.MouseClickMsg, tea.MouseMotionMsg:
+		case tui.MouseClickMsg, tui.MouseMotionMsg:
 		default:
 			break
 		}
@@ -184,10 +184,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m model) View() tea.View {
-	v := tea.NewView(m.cells.String())
+func (m model) View() tui.View {
+	v := tui.NewView(m.cells.String())
 	v.AltScreen = true
-	v.MouseMode = tea.MouseModeCellMotion
+	v.MouseMode = tui.MouseModeCellMotion
 	return v
 }
 
@@ -196,7 +196,7 @@ func main() {
 		spring: harmonica.NewSpring(harmonica.FPS(fps), frequency, damping),
 	}
 
-	p := tea.NewProgram(m)
+	p := tui.NewProgram(m)
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintln(os.Stderr, "Uh oh:", err)
 		os.Exit(1)

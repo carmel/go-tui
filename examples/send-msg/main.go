@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/spinner"
 )
 
@@ -52,20 +52,20 @@ func newModel() model {
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return m.spinner.Tick
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		m.quitting = true
-		return m, tea.Quit
+		return m, tui.Quit
 	case resultMsg:
 		m.results = append(m.results[1:], msg)
 		return m, nil
 	case spinner.TickMsg:
-		var cmd tea.Cmd
+		var cmd tui.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
 		return m, cmd
 	default:
@@ -73,7 +73,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	var b strings.Builder
 
 	if m.quitting {
@@ -98,11 +98,11 @@ func (m model) View() tea.View {
 		b.WriteString("\n")
 	}
 
-	return tea.NewView(appStyle.Render(b.String()))
+	return tui.NewView(appStyle.Render(b.String()))
 }
 
 func main() {
-	p := tea.NewProgram(newModel())
+	p := tui.NewProgram(newModel())
 
 	// Simulate activity
 	go func() {
@@ -111,7 +111,7 @@ func main() {
 			time.Sleep(pause)
 
 			// Send the Bubble Tea program a message from outside the
-			// tea.Program. This will block until it is ready to receive
+			// tui.Program. This will block until it is ready to receive
 			// messages.
 			p.Send(resultMsg{food: randomFood(), duration: pause})
 		}

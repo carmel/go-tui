@@ -4,9 +4,9 @@ package help
 import (
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 // KeyMap is a map of keybindings used to generate help. Since it's an
@@ -100,7 +100,7 @@ func New() Model {
 }
 
 // Update helps satisfy the Bubble Tea Model interface. It's a no-op.
-func (m Model) Update(_ tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(_ tui.Msg) (Model, tui.Cmd) {
 	return m, nil
 }
 

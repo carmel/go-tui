@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 // This Doom Fire implementation was ported from @const-void's Node version.
@@ -23,20 +23,20 @@ type model struct {
 	startTime   time.Time
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return tick
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		if msg.String() == "q" || msg.String() == "ctrl+c" {
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	case tickMsg:
 		m.spreadFire()
 		return m, tick
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height * 2 // Double height for half-block characters
 		m.screenBuf = make([]int, m.width*m.height)
@@ -48,9 +48,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.width == 0 {
-		return tea.NewView("Initializing...")
+		return tui.NewView("Initializing...")
 	}
 
 	var s strings.Builder
@@ -75,7 +75,7 @@ func (m model) View() tea.View {
 
 	elapsed := time.Since(m.startTime)
 	s.WriteString(whiteFg.Render("Press q or ctrl+c to quit. " + fmt.Sprintf("Elapsed: %s", elapsed.Round(time.Second))))
-	v := tea.NewView(s.String())
+	v := tui.NewView(s.String())
 	v.AltScreen = true
 	return v
 }
@@ -110,7 +110,7 @@ func (m *model) spreadPixel(idx int) {
 
 type tickMsg time.Time
 
-func tick() tea.Msg {
+func tick() tui.Msg {
 	time.Sleep(time.Millisecond * 50)
 	return tickMsg(time.Now())
 }
@@ -126,7 +126,7 @@ func initialModel() model {
 }
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error running program: %v", err)
 	}

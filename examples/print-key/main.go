@@ -3,27 +3,27 @@ package main
 import (
 	"log"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 type model struct{}
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyboardEnhancementsMsg:
-		return m, tea.Printf("Keyboard enhancements: EventTypes: %v\n",
+	case tui.KeyboardEnhancementsMsg:
+		return m, tui.Printf("Keyboard enhancements: EventTypes: %v\n",
 			msg.SupportsEventTypes())
-	case tea.KeyMsg:
+	case tui.KeyMsg:
 		key := msg.Key()
 		switch msg := msg.(type) {
-		case tea.KeyPressMsg:
+		case tui.KeyPressMsg:
 			switch msg.String() {
 			case "ctrl+c":
-				return m, tea.Quit
+				return m, tui.Quit
 			}
 		}
 		format := "(%T) You pressed: %s"
@@ -32,19 +32,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			format += " (text: %q)"
 			args = append(args, key.Text)
 		}
-		return m, tea.Printf(format, args...)
+		return m, tui.Printf(format, args...)
 	}
 	return m, nil
 }
 
-func (m model) View() tea.View {
-	v := tea.NewView("Press any key to see its details printed to the terminal. Press 'ctrl+c' to quit.")
+func (m model) View() tui.View {
+	v := tui.NewView("Press any key to see its details printed to the terminal. Press 'ctrl+c' to quit.")
 	v.KeyboardEnhancements.ReportEventTypes = true
 	return v
 }
 
 func main() {
-	p := tea.NewProgram(model{})
+	p := tui.NewProgram(model{})
 	if _, err := p.Run(); err != nil {
 		log.Printf("Error running program: %v", err)
 	}

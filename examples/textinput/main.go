@@ -6,13 +6,13 @@ package main
 import (
 	"log"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textinput"
 )
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -39,19 +39,19 @@ func initialModel() model {
 	return model{textInput: ti}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return textinput.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmd tui.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "enter", "ctrl+c", "esc":
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 
@@ -59,8 +59,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() tea.View {
-	var c *tea.Cursor
+func (m model) View() tui.View {
+	var c *tui.Cursor
 	if !m.textInput.VirtualCursor() {
 		c = m.textInput.Cursor()
 		c.Y += lipgloss.Height(m.headerView())
@@ -71,7 +71,7 @@ func (m model) View() tea.View {
 		str += "\n"
 	}
 
-	v := tea.NewView(str)
+	v := tui.NewView(str)
 	v.Cursor = c
 	return v
 }

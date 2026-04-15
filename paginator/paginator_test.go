@@ -3,7 +3,7 @@ package paginator
 import (
 	"testing"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 func TestNew(t *testing.T) {
@@ -76,7 +76,7 @@ func TestPrevPage(t *testing.T) {
 			model.SetTotalPages(tt.totalPages)
 			model.Page = tt.page
 
-			model, _ = model.Update(tea.KeyPressMsg{Code: tea.KeyLeft})
+			model, _ = model.Update(tui.KeyPressMsg{Code: tui.KeyLeft})
 			if model.Page != tt.expected {
 				t.Errorf("PrevPage() = %d, expected %d", model.Page, tt.expected)
 			}
@@ -101,7 +101,7 @@ func TestNextPage(t *testing.T) {
 			model.SetTotalPages(tt.totalPages)
 			model.Page = tt.page
 
-			model, _ = model.Update(tea.KeyPressMsg{Code: tea.KeyRight})
+			model, _ = model.Update(tui.KeyPressMsg{Code: tui.KeyRight})
 			if model.Page != tt.expected {
 				t.Errorf("NextPage() = %d, expected %d", model.Page, tt.expected)
 			}

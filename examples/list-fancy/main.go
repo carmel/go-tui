@@ -5,9 +5,9 @@ import (
 	"os"
 	"sync"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/list"
 )
 
@@ -90,9 +90,9 @@ type model struct {
 	delegateKeys  *delegateKeyMap
 }
 
-func (m model) Init() tea.Cmd {
-	return tea.Batch(
-		tea.RequestBackgroundColor,
+func (m model) Init() tui.Cmd {
+	return tui.Batch(
+		tui.RequestBackgroundColor,
 	)
 }
 
@@ -106,23 +106,23 @@ func (m *model) updateListProperties() {
 	m.list.Styles.Title = m.styles.title
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmds []tui.Cmd
 
 	switch msg := msg.(type) {
-	case tea.BackgroundColorMsg:
+	case tui.BackgroundColorMsg:
 		m.darkBG = msg.IsDark()
 		m.updateListProperties()
 		return m, nil
 
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.width, m.height = msg.Width, msg.Height
 		m.updateListProperties()
 		return m, nil
 	}
 
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		// Don't match any of the keys below if we're actively filtering.
 		if m.list.FilterState() == list.Filtering {
 			break
@@ -157,7 +157,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			newItem := m.itemGenerator.next()
 			insCmd := m.list.InsertItem(0, newItem)
 			statusCmd := m.list.NewStatusMessage(m.styles.statusMessage.Render("Added " + newItem.Title()))
-			return m, tea.Batch(insCmd, statusCmd)
+			return m, tui.Batch(insCmd, statusCmd)
 		}
 	}
 
@@ -166,11 +166,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.list = newListModel
 	cmds = append(cmds, cmd)
 
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
-func (m model) View() tea.View {
-	v := tea.NewView(m.styles.app.Render(m.list.View()))
+func (m model) View() tui.View {
+	v := tui.NewView(m.styles.app.Render(m.list.View()))
 	v.AltScreen = true
 	return v
 }
@@ -216,7 +216,7 @@ func initialModel() model {
 }
 
 func main() {
-	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
+	if _, err := tui.NewProgram(initialModel()).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

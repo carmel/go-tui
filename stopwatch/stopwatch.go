@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 var lastID int64
@@ -80,26 +80,26 @@ func (m Model) ID() int {
 }
 
 // Init starts the stopwatch.
-func (m Model) Init() tea.Cmd {
+func (m Model) Init() tui.Cmd {
 	return m.Start()
 }
 
 // Start starts the stopwatch.
-func (m Model) Start() tea.Cmd {
-	return tea.Sequence(func() tea.Msg {
+func (m Model) Start() tui.Cmd {
+	return tui.Sequence(func() tui.Msg {
 		return StartStopMsg{ID: m.id, running: true}
 	}, tick(m.id, m.tag, m.Interval))
 }
 
 // Stop stops the stopwatch.
-func (m Model) Stop() tea.Cmd {
-	return func() tea.Msg {
+func (m Model) Stop() tui.Cmd {
+	return func() tui.Msg {
 		return StartStopMsg{ID: m.id, running: false}
 	}
 }
 
 // Toggle stops the stopwatch if it is running and starts it if it is stopped.
-func (m Model) Toggle() tea.Cmd {
+func (m Model) Toggle() tui.Cmd {
 	if m.Running() {
 		return m.Stop()
 	}
@@ -107,8 +107,8 @@ func (m Model) Toggle() tea.Cmd {
 }
 
 // Reset resets the stopwatch to 0.
-func (m Model) Reset() tea.Cmd {
-	return func() tea.Msg {
+func (m Model) Reset() tui.Cmd {
+	return func() tui.Msg {
 		return ResetMsg{ID: m.id}
 	}
 }
@@ -119,7 +119,7 @@ func (m Model) Running() bool {
 }
 
 // Update handles the timer tick.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
 	switch msg := msg.(type) {
 	case StartStopMsg:
 		if msg.ID != m.id {
@@ -161,8 +161,8 @@ func (m Model) View() string {
 	return m.d.String()
 }
 
-func tick(id int, tag int, d time.Duration) tea.Cmd {
-	return tea.Tick(d, func(_ time.Time) tea.Msg {
+func tick(id int, tag int, d time.Duration) tui.Cmd {
+	return tui.Tick(d, func(_ time.Time) tui.Msg {
 		return TickMsg{ID: id, tag: tag}
 	})
 }

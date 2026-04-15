@@ -9,11 +9,11 @@ import (
 	"os"
 	"path/filepath"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/progress"
 )
 
-var p *tea.Program
+var p *tui.Program
 
 type progressWriter struct {
 	total      int
@@ -95,7 +95,7 @@ func main() {
 		progress: progress.New(progress.WithDefaultBlend()),
 	}
 	// Start Bubble Tea
-	p = tea.NewProgram(m)
+	p = tui.NewProgram(m)
 
 	// Start the download
 	go pw.Start()

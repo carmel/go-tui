@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textinput"
 )
 
@@ -14,44 +14,44 @@ type model struct {
 	width int
 }
 
-var _ tea.Model = model{}
+var _ tui.Model = model{}
 
-// Init implements tea.Model.
-func (m model) Init() tea.Cmd {
+// Init implements tui.Model.
+func (m model) Init() tui.Cmd {
 	return m.input.Focus()
 }
 
-// Update implements tea.Model.
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+// Update implements tui.Model.
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmd tui.Cmd
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.width = msg.Width
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "esc":
-			return m, tea.Quit
+			return m, tui.Quit
 		case "enter":
 			input := m.input.Value()
 			m.input.Reset()
-			return m, tea.RequestCapability(input)
+			return m, tui.RequestCapability(input)
 		}
-	case tea.CapabilityMsg:
-		return m, tea.Printf("Got capability: %s", msg)
+	case tui.CapabilityMsg:
+		return m, tui.Printf("Got capability: %s", msg)
 	}
 	m.input, cmd = m.input.Update(msg)
 	return m, cmd
 }
 
-// View implements tea.Model.
-func (m model) View() tea.View {
+// View implements tui.Model.
+func (m model) View() tui.View {
 	w := min(m.width, 60)
 
 	instructions := lipgloss.NewStyle().
 		Width(w).
 		Render("Query for terminal capabilities. You can enter things like 'TN', 'RGB', 'cols', and so on. This will not work in all terminals and multiplexers.")
 
-	return tea.NewView("\n" + instructions + "\n\n" +
+	return tui.NewView("\n" + instructions + "\n\n" +
 		m.input.View() +
 		"\n\nPress enter to request capability, or ctrl+c to quit.")
 }
@@ -62,7 +62,7 @@ func main() {
 	m.input.Placeholder = "Enter capability name to request"
 	m.input.Focus()
 
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	if _, err := tui.NewProgram(m).Run(); err != nil {
 		fmt.Fprintln(os.Stderr, "Uh oh:", err)
 		os.Exit(1)
 	}

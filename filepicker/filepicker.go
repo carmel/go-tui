@@ -11,9 +11,9 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/dustin/go-humanize"
 )
 
@@ -194,8 +194,8 @@ func (m *Model) popView() (int, int, int) {
 	return m.selectedStack.Pop(), m.minStack.Pop(), m.maxStack.Pop()
 }
 
-func (m Model) readDir(path string, showHidden bool) tea.Cmd {
-	return func() tea.Msg {
+func (m Model) readDir(path string, showHidden bool) tui.Cmd {
+	return func() tui.Msg {
 		dirEntries, err := os.ReadDir(path)
 		if err != nil {
 			return errorMsg{err}
@@ -238,12 +238,12 @@ func (m Model) Height() int {
 }
 
 // Init initializes the file picker model.
-func (m Model) Init() tea.Cmd {
+func (m Model) Init() tui.Cmd {
 	return m.readDir(m.CurrentDirectory, m.ShowHidden)
 }
 
 // Update handles user interactions within the file picker model.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
 	switch msg := msg.(type) {
 	case readDirMsg:
 		if msg.id != m.id {
@@ -251,12 +251,12 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		}
 		m.files = msg.entries
 		m.maxIdx = max(m.maxIdx, m.Height()-1)
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		if m.AutoHeight {
 			m.SetHeight(msg.Height - marginBottom)
 		}
 		m.maxIdx = m.Height() - 1
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.KeyMap.GoToTop):
 			m.selected = 0
@@ -444,7 +444,7 @@ func (m Model) View() string {
 }
 
 // DidSelectFile returns whether a user has selected a file (on this msg).
-func (m Model) DidSelectFile(msg tea.Msg) (bool, string) {
+func (m Model) DidSelectFile(msg tui.Msg) (bool, string) {
 	didSelect, path := m.didSelectFile(msg)
 	if didSelect && m.canSelect(path) {
 		return true, path
@@ -455,7 +455,7 @@ func (m Model) DidSelectFile(msg tea.Msg) (bool, string) {
 // DidSelectDisabledFile returns whether a user tried to select a disabled file
 // (on this msg). This is necessary only if you would like to warn the user that
 // they tried to select a disabled file.
-func (m Model) DidSelectDisabledFile(msg tea.Msg) (bool, string) {
+func (m Model) DidSelectDisabledFile(msg tui.Msg) (bool, string) {
 	didSelect, path := m.didSelectFile(msg)
 	if didSelect && !m.canSelect(path) {
 		return true, path
@@ -463,12 +463,12 @@ func (m Model) DidSelectDisabledFile(msg tea.Msg) (bool, string) {
 	return false, ""
 }
 
-func (m Model) didSelectFile(msg tea.Msg) (bool, string) {
+func (m Model) didSelectFile(msg tui.Msg) (bool, string) {
 	if len(m.files) == 0 {
 		return false, ""
 	}
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		// If the msg does not match the Select keymap then this could not have been a selection.
 		if !key.Matches(msg, m.KeyMap.Select) {
 			return false, ""

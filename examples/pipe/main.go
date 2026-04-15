@@ -12,8 +12,8 @@ import (
 	"os"
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textinput"
 )
 
@@ -45,7 +45,7 @@ func main() {
 
 	model := newModel(strings.TrimSpace(b.String()))
 
-	if _, err := tea.NewProgram(model).Run(); err != nil {
+	if _, err := tui.NewProgram(model).Run(); err != nil {
 		fmt.Println("Couldn't start program:", err)
 		os.Exit(1)
 	}
@@ -72,25 +72,25 @@ func newModel(initialValue string) (m model) {
 	return m
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return textinput.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if key, ok := msg.(tea.KeyMsg); ok {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	if key, ok := msg.(tui.KeyMsg); ok {
 		switch key.String() {
 		case "ctrl+c", "esc", "enter":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 
-	var cmd tea.Cmd
+	var cmd tui.Cmd
 	m.userInput, cmd = m.userInput.Update(msg)
 	return m, cmd
 }
 
-func (m model) View() tea.View {
-	return tea.NewView(fmt.Sprintf(
+func (m model) View() tui.View {
+	return tui.NewView(fmt.Sprintf(
 		"\nYou piped in: %s\n\nPress ^C to exit",
 		m.userInput.View(),
 	))

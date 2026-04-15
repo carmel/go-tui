@@ -4,33 +4,33 @@ import (
 	"fmt"
 	"os"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 )
 
 type model struct {
-	cursor tea.Cursor
+	cursor tui.Cursor
 	blink  bool
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return m, tui.Quit
 		case "h", "left":
 			m.cursor.Shape--
-			if m.cursor.Shape < tea.CursorBlock {
-				m.cursor.Shape = tea.CursorBar
+			if m.cursor.Shape < tui.CursorBlock {
+				m.cursor.Shape = tui.CursorBar
 			}
 		case "l", "right":
 			m.cursor.Shape++
-			if m.cursor.Shape > tea.CursorBar {
-				m.cursor.Shape = tea.CursorBlock
+			if m.cursor.Shape > tui.CursorBar {
+				m.cursor.Shape = tui.CursorBlock
 			}
 		}
 	}
@@ -38,11 +38,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
-	v := tea.NewView("Press left/right to change the cursor style, q or ctrl+c to quit." +
+func (m model) View() tui.View {
+	v := tui.NewView("Press left/right to change the cursor style, q or ctrl+c to quit." +
 		"\n\n" +
 		"  <- This is the cursor (a " + m.describeCursor() + ")")
-	c := tea.NewCursor(0, 2)
+	c := tui.NewCursor(0, 2)
 	c.Shape = m.cursor.Shape
 	c.Blink = m.blink
 	v.Cursor = c
@@ -59,11 +59,11 @@ func (m model) describeCursor() string {
 	}
 
 	switch m.cursor.Shape {
-	case tea.CursorBlock:
+	case tui.CursorBlock:
 		noun = "block"
-	case tea.CursorUnderline:
+	case tui.CursorUnderline:
 		noun = "underline"
-	case tea.CursorBar:
+	case tui.CursorBar:
 		noun = "bar"
 	}
 
@@ -71,7 +71,7 @@ func (m model) describeCursor() string {
 }
 
 func main() {
-	p := tea.NewProgram(model{blink: true})
+	p := tui.NewProgram(model{blink: true})
 	if _, err := p.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v", err)
 		os.Exit(1)

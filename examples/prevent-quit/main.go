@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"log"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/help"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textarea"
 )
 
@@ -20,15 +20,15 @@ var (
 )
 
 func main() {
-	p := tea.NewProgram(initialModel(), tea.WithFilter(filter))
+	p := tui.NewProgram(initialModel(), tui.WithFilter(filter))
 
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func filter(teaModel tea.Model, msg tea.Msg) tea.Msg {
-	if _, ok := msg.(tea.QuitMsg); !ok {
+func filter(teaModel tui.Model, msg tui.Msg) tui.Msg {
+	if _, ok := msg.(tui.QuitMsg); !ok {
 		return msg
 	}
 
@@ -75,11 +75,11 @@ func initialModel() model {
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return textarea.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	if m.quitting {
 		return m.updatePromptView(msg)
 	}
@@ -87,12 +87,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m.updateTextView(msg)
 }
 
-func (m model) updateTextView(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
-	var cmd tea.Cmd
+func (m model) updateTextView(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmds []tui.Cmd
+	var cmd tui.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		m.saveText = ""
 		switch {
 		case key.Matches(msg, m.keymap.save):
@@ -100,7 +100,7 @@ func (m model) updateTextView(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.hasChanges = false
 		case key.Matches(msg, m.keymap.quit):
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		case len(msg.Text) > 0:
 			m.saveText = ""
 			m.hasChanges = true
@@ -114,16 +114,16 @@ func (m model) updateTextView(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	m.textarea, cmd = m.textarea.Update(msg)
 	cmds = append(cmds, cmd)
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
-func (m model) updatePromptView(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) updatePromptView(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		// For simplicity's sake, we'll treat any key besides "y" as "no"
 		if key.Matches(msg, m.keymap.quit) || msg.String() == "y" {
 			m.hasChanges = false
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 		m.quitting = false
 	}
@@ -131,13 +131,13 @@ func (m model) updatePromptView(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.quitting {
 		if m.hasChanges {
 			text := lipgloss.JoinHorizontal(lipgloss.Top, "You have unsaved changes. Quit without saving?", choiceStyle.Render("[yN]"))
-			return tea.NewView(quitViewStyle.Render(text))
+			return tui.NewView(quitViewStyle.Render(text))
 		}
-		return tea.NewView("Very important. Thank you.\n")
+		return tui.NewView("Very important. Thank you.\n")
 	}
 
 	helpView := m.help.ShortHelpView([]key.Binding{
@@ -145,7 +145,7 @@ func (m model) View() tea.View {
 		m.keymap.quit,
 	})
 
-	return tea.NewView(fmt.Sprintf(
+	return tui.NewView(fmt.Sprintf(
 		"Type some important things.\n%s\n %s\n %s",
 		m.textarea.View(),
 		saveTextStyle.Render(m.saveText),

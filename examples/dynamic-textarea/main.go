@@ -5,12 +5,12 @@ import (
 	"log"
 	"strings"
 
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/textarea"
 )
 
 func main() {
-	p := tea.NewProgram(initialModel())
+	p := tui.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -35,27 +35,27 @@ func initialModel() model {
 	return model{textarea: ti}
 }
 
-func (m model) Init() tea.Cmd {
-	return tea.Batch(textarea.Blink, tea.RequestBackgroundColor)
+func (m model) Init() tui.Cmd {
+	return tui.Batch(textarea.Blink, tui.RequestBackgroundColor)
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
-	var cmd tea.Cmd
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmds []tui.Cmd
+	var cmd tui.Cmd
 
 	switch msg := msg.(type) {
-	case tea.BackgroundColorMsg:
+	case tui.BackgroundColorMsg:
 		m.textarea.SetStyles(textarea.DefaultStyles(msg.IsDark()))
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch msg.String() {
 		case "ctrl+c":
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 
 	m.textarea, cmd = m.textarea.Update(msg)
 	cmds = append(cmds, cmd)
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
 func (m model) statusView() string {
@@ -69,10 +69,10 @@ func (m model) statusView() string {
 	)
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	const gap = 1
 
-	var c *tea.Cursor
+	var c *tui.Cursor
 	if !m.textarea.VirtualCursor() {
 		c = m.textarea.Cursor()
 		c.Y += gap
@@ -85,7 +85,7 @@ func (m model) View() tea.View {
 		"\n(ctrl+c to quit)",
 	}, "\n")
 
-	v := tea.NewView(f)
+	v := tui.NewView(f)
 	v.Cursor = c
 	return v
 }

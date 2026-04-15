@@ -5,10 +5,10 @@ import (
 	"os"
 	"strings"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/help"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 // keyMap defines a set of keybindings. To work for help it must satisfy
@@ -80,18 +80,18 @@ func newModel() model {
 	}
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		// If we set a width on the help menu it can gracefully truncate
 		// its view as needed.
 		m.help.SetWidth(msg.Width)
 
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.keys.Up):
 			m.lastKey = "↑"
@@ -105,16 +105,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.help.ShowAll = !m.help.ShowAll
 		case key.Matches(msg, m.keys.Quit):
 			m.quitting = true
-			return m, tea.Quit
+			return m, tui.Quit
 		}
 	}
 
 	return m, nil
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	if m.quitting {
-		return tea.NewView("Bye!\n")
+		return tui.NewView("Bye!\n")
 	}
 
 	var status string
@@ -127,12 +127,12 @@ func (m model) View() tea.View {
 	helpView := m.help.View(m.keys)
 	height := 8 - strings.Count(status, "\n") - strings.Count(helpView, "\n")
 
-	return tea.NewView(status + strings.Repeat("\n", height) + helpView)
+	return tui.NewView(status + strings.Repeat("\n", height) + helpView)
 }
 
 func main() {
 	if os.Getenv("HELP_DEBUG") != "" {
-		f, err := tea.LogToFile("debug.log", "help")
+		f, err := tui.LogToFile("debug.log", "help")
 		if err != nil {
 			fmt.Println("Couldn't open a file for logging:", err)
 			os.Exit(1)
@@ -140,7 +140,7 @@ func main() {
 		defer f.Close() // nolint:errcheck
 	}
 
-	if _, err := tea.NewProgram(newModel()).Run(); err != nil {
+	if _, err := tui.NewProgram(newModel()).Run(); err != nil {
 		fmt.Printf("Could not start program :(\n%v\n", err)
 		os.Exit(1)
 	}

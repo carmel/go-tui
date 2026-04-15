@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"charm.land/lipgloss/v2"
-	tea "github.com/carmel/go-tui"
+	"github.com/carmel/go-tui"
 	"github.com/carmel/go-tui/help"
 	"github.com/carmel/go-tui/key"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textarea"
 )
 
@@ -116,21 +116,21 @@ func newModel() model {
 	return m
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return textarea.Blink
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
+	var cmds []tui.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
+	case tui.KeyPressMsg:
 		switch {
 		case key.Matches(msg, m.keymap.quit):
 			for i := range m.inputs {
 				m.inputs[i].Blur()
 			}
-			return m, tea.Quit
+			return m, tui.Quit
 		case key.Matches(msg, m.keymap.next):
 			m.inputs[m.focus].Blur()
 			m.focus++
@@ -155,7 +155,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.focus = len(m.inputs) - 1
 			}
 		}
-	case tea.WindowSizeMsg:
+	case tui.WindowSizeMsg:
 		m.height = msg.Height
 		m.width = msg.Width
 	}
@@ -170,7 +170,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmds = append(cmds, cmd)
 	}
 
-	return m, tea.Batch(cmds...)
+	return m, tui.Batch(cmds...)
 }
 
 func (m *model) sizeInputs() {
@@ -193,7 +193,7 @@ func (m model) inputViews() []string {
 	return views
 }
 
-func (m model) View() tea.View {
+func (m model) View() tui.View {
 	help := m.help.ShortHelpView([]key.Binding{
 		m.keymap.next,
 		m.keymap.prev,
@@ -202,12 +202,12 @@ func (m model) View() tea.View {
 		m.keymap.quit,
 	})
 
-	v := tea.NewView(lipgloss.JoinHorizontal(lipgloss.Top, m.inputViews()...) + "\n\n" + help)
+	v := tui.NewView(lipgloss.JoinHorizontal(lipgloss.Top, m.inputViews()...) + "\n\n" + help)
 	v.AltScreen = true
 	return v
 }
 
-func (m model) Cursor() *tea.Cursor {
+func (m model) Cursor() *tui.Cursor {
 	focusedInput := m.inputs[m.focus]
 	if focusedInput.VirtualCursor() {
 		return nil
@@ -228,7 +228,7 @@ func (m model) Cursor() *tea.Cursor {
 }
 
 func main() {
-	if _, err := tea.NewProgram(newModel()).Run(); err != nil {
+	if _, err := tui.NewProgram(newModel()).Run(); err != nil {
 		fmt.Println("Error while running program:", err)
 		os.Exit(1)
 	}

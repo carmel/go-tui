@@ -5,8 +5,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 // Internal ID management. Used during animating to ensure that frame messages
@@ -128,7 +128,7 @@ type TickMsg struct {
 }
 
 // Update is the Tea update function.
-func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
+func (m Model) Update(msg tui.Msg) (Model, tui.Cmd) {
 	switch msg := msg.(type) {
 	case TickMsg:
 		// If an ID is set, and the ID doesn't belong to this spinner, reject
@@ -167,7 +167,7 @@ func (m Model) View() string {
 
 // Tick is the command used to advance the spinner one frame. Use this command
 // to effectively start the spinner.
-func (m Model) Tick() tea.Msg {
+func (m Model) Tick() tui.Msg {
 	return TickMsg{
 		// The time at which the tick occurred.
 		Time: time.Now(),
@@ -181,8 +181,8 @@ func (m Model) Tick() tea.Msg {
 	}
 }
 
-func (m Model) tick(id, tag int) tea.Cmd {
-	return tea.Tick(m.Spinner.FPS, func(t time.Time) tea.Msg {
+func (m Model) tick(id, tag int) tui.Cmd {
+	return tui.Tick(m.Spinner.FPS, func(t time.Time) tui.Msg {
 		return TickMsg{
 			Time: t,
 			ID:   id,

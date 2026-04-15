@@ -1,7 +1,7 @@
 package list
 
 import (
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui/lipgloss"
 	"github.com/carmel/go-tui/textinput"
 )
 

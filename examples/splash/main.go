@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	tea "github.com/carmel/go-tui"
-	"charm.land/lipgloss/v2"
+	"github.com/carmel/go-tui"
+	"github.com/carmel/go-tui/lipgloss"
 )
 
 // This example was ported from the awesome Textualize project by @willmcgugan.
@@ -37,15 +37,15 @@ type model struct {
 	rate   int64
 }
 
-func (m model) Init() tea.Cmd {
+func (m model) Init() tui.Cmd {
 	return tick
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m model) Update(msg tui.Msg) (tui.Model, tui.Cmd) {
 	switch msg := msg.(type) {
-	case tea.KeyPressMsg:
-		return m, tea.Quit
-	case tea.WindowSizeMsg:
+	case tui.KeyPressMsg:
+		return m, tui.Quit
+	case tui.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 	case tickMsg:
@@ -54,8 +54,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m model) View() tea.View {
-	var v tea.View
+func (m model) View() tui.View {
+	var v tui.View
 	v.AltScreen = true
 	if m.width == 0 {
 		v.SetContent("Initializing...")
@@ -163,12 +163,12 @@ func interpolateColors(color1, color2 color.Color, t float64) color.Color {
 
 type tickMsg time.Time
 
-func tick() tea.Msg {
+func tick() tui.Msg {
 	return tickMsg(time.Now())
 }
 
 func main() {
-	p := tea.NewProgram(
+	p := tui.NewProgram(
 		model{rate: 90},
 	)
 
