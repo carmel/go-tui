@@ -1,4 +1,4 @@
-// Package tea provides a framework for building rich terminal user interfaces
+// package tui provides a framework for building rich terminal user interfaces
 // based on the paradigms of The Elm Architecture. It's well-suited for simple
 // and complex terminal applications, either inline, full-window, or a mix of
 // both. It's been battle-tested in several large projects and is
@@ -7,7 +7,7 @@
 // A tutorial is available at https://github.com/carmel/go-tui/tree/master/tutorials
 //
 // Example programs can be found at https://github.com/carmel/go-tui/tree/master/examples
-package tea
+package tui
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package tea
+package tui
 
 // RawMsg is a message that contains a string to be printed to the terminal
 // without any intermediate processing.

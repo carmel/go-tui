@@ -1,4 +1,4 @@
-package tea
+package tui
 
 // TerminalVersionMsg is a message that represents the terminal version.
 type TerminalVersionMsg struct {

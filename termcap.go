@@ -1,4 +1,4 @@
-package tea
+package tui
 
 // requestCapabilityMsg is an internal message that requests the terminal to
 // send its Termcap/Terminfo response.

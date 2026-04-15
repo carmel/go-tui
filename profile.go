@@ -1,4 +1,4 @@
-package tea
+package tui
 
 import "github.com/charmbracelet/colorprofile"
 

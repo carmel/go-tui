@@ -1,4 +1,4 @@
-package tea
+package tui
 
 // FocusMsg represents a terminal focus message.
 // This occurs when the terminal gains focus.

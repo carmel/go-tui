@@ -1,7 +1,7 @@
 //go:build darwin || linux || solaris || aix
 // +build darwin linux solaris aix
 
-package tea
+package tui
 
 import (
 	"github.com/charmbracelet/x/term"

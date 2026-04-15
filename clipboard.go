@@ -1,4 +1,4 @@
-package tea
+package tui
 
 // ClipboardMsg is a clipboard read message event. This message is emitted when
 // a terminal receives an OSC52 clipboard read message event.

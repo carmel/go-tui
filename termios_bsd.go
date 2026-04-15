@@ -1,7 +1,7 @@
 //go:build dragonfly || freebsd
 // +build dragonfly freebsd
 
-package tea
+package tui
 
 import (
 	"github.com/charmbracelet/x/term"

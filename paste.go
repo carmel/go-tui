@@ -1,4 +1,4 @@
-package tea
+package tui
 
 // PasteMsg is an message that is emitted when a terminal receives pasted text
 // using bracketed-paste.

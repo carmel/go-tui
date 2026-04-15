@@ -1,7 +1,7 @@
 //go:build !windows && !darwin && !dragonfly && !freebsd && !linux && !solaris && !aix
 // +build !windows,!darwin,!dragonfly,!freebsd,!linux,!solaris,!aix
 
-package tea
+package tui
 
 import "github.com/charmbracelet/x/term"
 

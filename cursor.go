@@ -1,4 +1,4 @@
-package tea
+package tui
 
 // Position represents a position in the terminal.
 type Position struct{ X, Y int }

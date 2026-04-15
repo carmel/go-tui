@@ -1,4 +1,4 @@
-package tea
+package tui
 
 import (
 	uv "github.com/charmbracelet/ultraviolet"
